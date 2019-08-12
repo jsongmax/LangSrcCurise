@@ -23,7 +23,7 @@ sys.path.insert(0,pathname)
 sys.path.insert(0,os.path.abspath(os.path.join(pathname,'..')))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE","LangSrcCurise.settings")
 django.setup()
-from app.models import Setting
+from app.models import Setting,URL
 
 Set = Setting.objects.all()[0]
 pool_count = int(Set.Pool)
@@ -177,6 +177,7 @@ def Cralw_Baidu(domainkey):
             pass
     res = (list(set(result)))
     print('[+ Baidu Search] 百度搜索 : {} 捕获子域名总数 : {}'.format(domainkey,len(res)))
+    return res
 
 
 def Baidu(domain):
