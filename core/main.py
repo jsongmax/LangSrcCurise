@@ -122,8 +122,10 @@ def Add_Data_To_Url(url):
                 # 尝试进行域名总数据获取检测
                 if This_Sub != []:
                     Domain_Count = Domains.objects.filter(url=This_Sub[0])[0]
-                    counts = int(Domain_Count.counts)+1
-                    Domain_Count.counts = counts
+                    counts = Other_Url.objects.filter(url__contains=This_Sub[0])
+                    Domain_Count.counts = str(len(counts))
+                    # counts = int(Domain_Count.counts)+1
+                    # Domain_Count.counts = counts
                     Domain_Count.save()
             except Exception as e:
                 print('错误代码 [15] {}'.format(str(e)))
@@ -372,12 +374,11 @@ def Run_Crawl(Domains):
                 except Exception as e:
                     print('错误代码 [11] {}'.format(str(e)))
                     Error_Log.objects.create(url=url, error='错误代码 [11] {}'.format(str(e)))
-
                 if Other_Domains != []:
                     for urle in Other_Domains:
                         try:
-                            Test_Other_Url = Other_Url.objects.filter(url=urle)
-                            if list(Test_Other_Url) == []:
+                            Test_Other_Url = list(Other_Url.objects.filter(url=urle))
+                            if Test_Other_Url == []:
                                 ip = get_host(urle)
                                 res = Get_Url_Info(urle).get_info()
                                 res_url = res.get('url')
