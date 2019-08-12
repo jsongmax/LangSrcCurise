@@ -29,6 +29,16 @@ Set = Setting.objects.all()[0]
 pool_count = int(Set.Pool)
 Alive_Status = eval(Set.Alive_Code)
 
+Dicts = os.path.join('Auxiliary','Black_Url.list')
+
+black_list = list(set([x.strip() for x in open(Dicts, 'r', encoding='utf-8').readlines()]))
+def check_black(url):
+    res = [True if x in url else False for x in black_list]
+    if True in res:
+        return True
+    else:
+        return False
+
 headerss = [
     "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/22.0.1207.1 Safari/537.1",
     "Mozilla/5.0 (X11; CrOS i686 2268.111.0) AppleWebKit/536.11 (KHTML, like Gecko) Chrome/20.0.1132.57 Safari/536.11",
@@ -200,7 +210,9 @@ def Baidu(domain):
                 if r.status_code in Alive_Status:
                 # 这里读取验证码即可
                     real_url = r.url.rstrip('/')
-                    returl_result.add(urlparse(real_url).scheme + '://' + urlparse(real_url).netloc)
+                    bla = check_black(real_url)
+                    if bla == False:
+                        returl_result.add(urlparse(real_url).scheme + '://' + urlparse(real_url).netloc)
         except Exception as e:
             # print(e)
             pass
