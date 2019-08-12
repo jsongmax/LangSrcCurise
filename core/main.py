@@ -374,12 +374,12 @@ def Run_Crawl(Domains):
                     Error_Log.objects.create(url=url, error='错误代码 [11] {}'.format(str(e)))
 
                 if Other_Domains != []:
-                    for url in Other_Domains:
+                    for urle in Other_Domains:
                         try:
-                            Test_Other_Url = Other_Url.objects.filter(url=url)
+                            Test_Other_Url = Other_Url.objects.filter(url=urle)
                             if list(Test_Other_Url) == []:
-                                ip = get_host(url)
-                                res = Get_Url_Info(url).get_info()
+                                ip = get_host(urle)
+                                res = Get_Url_Info(urle).get_info()
                                 res_url = res.get('url')
                                 res_title = res.get('title')
                                 res_power = res.get('power')
