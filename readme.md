@@ -2,7 +2,7 @@
 
 LangSrc资产监控系统是一套实现对指定域名进行持续性信息收集整理的自动化资产监控管理系统，基于Django开发。
 
-DJjango是趁下班休息时间抽空学了点，大概看了25小时左右文档，基础可能会有些薄弱，导致有些地方处理的很粗糙，不过会在后期慢慢完善，前端基于之前学过的的一点点Bootstrap，数据可视化基于pyecharts。
+DJjango是趁下班休息时间抽空学了点，大概看了25小时左右文档，基础有些薄弱，以至于有些地方处理的很粗糙，不过会在后期慢慢完善，前端基于之前学过的的一点点Bootstrap，数据可视化基于pyecharts。
 
 个人以为，类似于WEB服务的系统，最好的打包方案就是把所有需要的库保存在本地，每次在迁移环境和配置使用都可以得心应手，所以该项目将所有需要的库都打包在本地文件，无需再安装。
 
@@ -15,9 +15,9 @@ DJjango是趁下班休息时间抽空学了点，大概看了25小时左右文�
 最好是在一个全新的环境安装
 
 1. 安装软件  python3.6     注意必须为 3.6
-2. 执行命令  pip3 install django==2.1.1
+2. 执行命令  python3 -m pip install django==2.1.1,或者在本地 Need_Packages 解压django后执行命令python3 setup.py install
 3. Windows  安装Nmap 并添加到系统环境变量,windows安装nmap可能需要安装目录下 Need_Packages/WinPcap_4_1_3.exe 
-3. Linux    安装Nmap 并添加到系统环境变量，linux暂时不能兼任适配，后期维护
+3. Linux    安装Nmap 并添加到系统环境变量，linux暂时不能完美兼容适配，后期维护
 4. 注意     Linux/Windows   必须要以管理员身份启动
 
 **注意：即下方执行python3 run_tasks.py的时候，必须右键以管理员身份启动CMD，然后CMD移动路径到LangSrc资产监控目录下，然后在执行命令 python3 run_tasks.py 如果是 Linux 需要加上SUDO 即 sudo python3 run_tasks.py**
