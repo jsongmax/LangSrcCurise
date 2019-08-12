@@ -300,17 +300,31 @@ def Change_ShowData_Info(Sub_Domains):
             print('错误代码 [43] {}'.format(str(e)))
             Error_Log.objects.create(url='清洗数据URL:{} IP:{}失败'.format(url,ip), error='错误代码 [43] {}'.format(str(e)))
 
+# def Run_Baidu(url):
+#     # 这里对传入Baidu进行重写，该函数接受一个参数域名，返回参数对应的网址，列表格式
+#
+
 def Sub_Baidu(Sub_Domains):
     while 1:
         res = []
-        with ProcessPoolExecutor(max_workers=pool_count) as pool:
-            res = list(pool.map(Baidu,Sub_Domains))
-        if res != []:
-            res = list(set([y for x in res for y in x]))
-            with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                result = pool.map(Add_Data_To_Url, res)
-        # 每次跑完休息一阵子
+        for sub_domain in Sub_Domains:
+            res = Baidu(sub_domain)
+            if res != []:
+                with ProcessPoolExecutor(max_workers=pool_count) as pool:
+                    result = pool.map(Add_Data_To_Url, list(set(res)))
+            time.sleep(60)
+            # 每次扫完一个域名等待一小会儿
         time.sleep(3600*12)
+        # 每12小时监控一次
+
+        # with ProcessPoolExecutor(max_workers=pool_count) as pool:
+        #     res = list(pool.map(Baidu,Sub_Domains))
+        # if res != []:
+        #     res = list(set([y for x in res for y in x]))
+        #     with ProcessPoolExecutor(max_workers=pool_count) as pool:
+        #         result = pool.map(Add_Data_To_Url, res)
+        # # 每次跑完休息一阵子
+        # time.sleep(3600*12)
 
 
 def Sub_Brute(Sub_Domains):
