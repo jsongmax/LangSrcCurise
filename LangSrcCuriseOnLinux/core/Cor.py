@@ -26,9 +26,9 @@ def network():
     now_recv = p.net_io_counters().bytes_recv
     now_send = p.net_io_counters().bytes_sent
 
-    delta_send = (now_send - before_send) / 1024000
-    delta_recv = (now_recv - before_recv) / 1024000
-    return (str(cpu),str(men),int(delta_send),int(delta_recv))
+    delta_send = (now_send - before_send) / 102400
+    delta_recv = (now_recv - before_recv) / 102400
+    return (str(cpu).split('.')[0],str(men).split('.')[0],int(delta_send),int(delta_recv))
 
 def Cor():
     # 返回一个小时内，CPU/内存 使用率% 和使用的宽带 上传/下载量 M

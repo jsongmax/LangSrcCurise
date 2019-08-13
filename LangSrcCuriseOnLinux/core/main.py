@@ -226,7 +226,7 @@ def Change_ShowData_Info(Sub_Domains):
             Data_IP = IP.objects.filter(ip=ip)[0]
             if Data_IP.get == '否' or Data_IP.get == '中':
                 # 如果收集整理的数据还没有获取完成
-                time.sleep(360)
+                time.sleep(3600)
                 return
             else:
                 target_info.get = '中'
