@@ -371,7 +371,7 @@ def search(request):
                                                  'key':KEY,
                                                  'value':VALUE})
         if KEY == 'server':
-            Res = Other_Url.objects.filter(servers__contains=VALUE).values()
+            Res = IP.objects.filter(servers__contains=VALUE).values()
             counts = len(Res)
 
             paginator = Paginator(Res, 5)
