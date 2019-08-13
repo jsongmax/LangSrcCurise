@@ -274,7 +274,7 @@ def show(request):
             else:
                 return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts})
     except:
-        pass
+        return render(request, '404.html')
 
 @login_required
 def search(request):
