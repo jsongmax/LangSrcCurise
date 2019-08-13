@@ -227,6 +227,8 @@ def index(request):
                                           'ip_counts':ip_counts,
                                           'user':user})
 
+# def G_ip(request):
+#     # 该函数用来接受 ip，然后返回
 
     # 'cpu_ech':cpu_ech,
 @login_required
@@ -250,22 +252,29 @@ def show(request):
     KEY = list(request.GET.keys())[1]
     # url
     VALUE = request.GET.get(KEY)
-    if KEY == 'url':
-        Res = Show_Data.objects.filter(url=VALUE).values()[0]
-        check = Res.get('check')
-        if check == '否':
-            total = '1'
-            return render(request, 'result.html', {'bea_list': Res,'totla':total})
-        else:
-            return render(request, 'result.html', {'bea_list': Res})
-    if KEY == 'ip':
-        Res = Show_Data.objects.filter(ip=VALUE).values()[0]
-        check = Res.get('check')
-        if check == '否':
-            total = '1'
-            return render(request, 'result.html', {'bea_list': Res,'totla':total})
-        else:
-            return render(request, 'result.html', {'bea_list': Res})
+    try:
+        if KEY == 'url':
+            Res = Show_Data.objects.filter(url=VALUE)[0]
+            ip_counts = len(Other_Url.objects.filter(ip=Res.ip))
+
+            check = Res.check
+            if check == '否':
+                total = '1'
+                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts})
+            else:
+                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts})
+        if KEY == 'ip':
+            Res = Show_Data.objects.filter(ip=VALUE)[0]
+            ip_counts = len(Other_Url.objects.filter(ip=Res.ip))
+
+            check = Res.check
+            if check == '否':
+                total = '1'
+                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts})
+            else:
+                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts})
+    except:
+        pass
 
 @login_required
 def search(request):
@@ -378,6 +387,24 @@ def search(request):
                                                  'dbname':'主机端口',
                                                  'key':KEY,
                                                  'value':VALUE})
+        if KEY == 'gip':
+            Res = Other_Url.objects.filter(ip__contains=VALUE).values()
+            counts = len(Res)
+
+            paginator = Paginator(Res, 5)
+            page = request.GET.get('page')
+            try:
+                beatles_list = paginator.page(page)
+            except PageNotAnInteger:
+                beatles_list = paginator.page(1)
+            except EmptyPage:
+                beatles_list = paginator.page(paginator.num_pages)
+            return render(request, 'show.html', {'bea_list': beatles_list,
+                                                 'counts':counts,
+                                                 'dbname':'网络资产',
+                                                 'key':KEY,
+                                                 'value':VALUE})
+
         if KEY == 'area':
             Res = IP.objects.filter(area__contains=VALUE).values()
             counts = len(Res)
