@@ -159,7 +159,7 @@ class Get_Ip_Info:
         result = {}
         try:
             nm = nmap.PortScanner()
-            res = nm.scan(ip,arguments='-Pn -sS')
+            res = nm.scan(ip,arguments='-Pn -sS -p 1-65535')
             try:
                 r = res['scan'][ip]['tcp']
                 if r:
@@ -169,7 +169,7 @@ class Get_Ip_Info:
                     # print(result)
                     # print('secend data')
                     for k,v in result.items():
-                        if v == None or v=='unknown':
+                        if v == None or v=='unknown' or v == '':
                             result[k] = self.get_server_from_banner(ip,int(k))
             except Exception as e:
                 print('错误代码 [17] {} 扫描当前IP失败'.format(str(e)))
