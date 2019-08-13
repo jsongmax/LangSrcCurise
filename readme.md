@@ -36,6 +36,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 **注意：在linux下执行任何生成数据库，启动任何服务命令前都需要加上 sudo**
 
+
 ## Windows 用户
 
 依次执行如下操作：
@@ -55,6 +56,8 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. python3 manage.py makemigrations
 2. python3 manage.py migrate
 3. python3 manage.py createsuperuser # 按照提示注册生成管理员账号密码
+
+**注意：如果是linux，这里需要给本地数据库权限，执行命令 sudo chmod 666 db.sqlite3**
 
 ## 初始化监控域名
 
