@@ -65,6 +65,18 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 完成将监控域名初始化到数据库
 
 
+## 配置网址过滤黑名单
+
+	Auxiliary/Black_Url.list
+
+其下的网址都会被自动过滤，请勿修改文件名
+
+## 配置子域名爆破字典
+
+	Auxiliary/SubDomainDict.list
+
+请勿修改文件名
+
 ## 启动服务
 
 在 LangSrcCurise 文件夹下依次执行如下命令：
