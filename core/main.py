@@ -385,6 +385,7 @@ def Sub_Brute(Sub_Domains):
 
 
 def Run_Crawl(Domains):
+    Domains = ['.'+str(x) for x in Domains]
     while 1:
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
