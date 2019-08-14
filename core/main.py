@@ -83,40 +83,42 @@ def Add_Data_To_Url(url):
                 res_server = res.get('server')
                 res_status = res.get('status')
                 res_ip = ip
-                if int(res_status) in Alive_Status:
+                #if int(res_status) in Alive_Status:
                     # 添加的标准是 在入库状态码内
-                    Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,
+                Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,
                                              status=res_status,ip=res_ip)
+
         except Exception as e:
             print('错误代码 [29] {}'.format(str(e)))
             Error_Log.objects.create(url=url, error='错误代码 [29] {}'.format(str(e)))
 
         try:
-            res = Get_Url_Info(url).get_info()
-            res_status = res.get('status')
+            # res = Get_Url_Info(url).get_info()
+            # res_status = res.get('status')
             # 再次获取状态码，判断是否符合入库状态，以保证数据统一
-            if int(res_status) not in Alive_Status:
-                return
+            # if int(res_status) not in Alive_Status:
+            #     return
 
             # 接下来可以进行数据索引唯一统一
+            test_url1 = list(URL.objects.filter(url=url))
+            # 如果数据库有这个网站的话，就直接退出
 
-            URL.objects.create(url=url,ip=ip)
-            # 添加 网址索引
-            try:
-                Show_contents = Get_Url_Info(url).Requests()[0]
-                Cont = Content()
-                Cont.url = url
-                Cont.content = Show_contents
-                IP_Res = Get_Ip_Info(ip)
-                Show_cs = IP_Res.get_cs_name(ip)
-                Cont.save()
-                Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
-                # 添加网页内容，数据展示
-            except Exception as e:
-                print('错误代码 [08] {}'.format(str(e)))
-                Error_Log.objects.create(url='外键添加错误', error='错误代码 [08] {}'.format(str(e)))
-
-
+            if test_url1 == []:
+                URL.objects.create(url=url,ip=ip)
+                # 添加 网址索引
+                try:
+                    Show_contents = Get_Url_Info(url).Requests()[0]
+                    Cont = Content()
+                    Cont.url = url
+                    Cont.content = Show_contents
+                    IP_Res = Get_Ip_Info(ip)
+                    Show_cs = IP_Res.get_cs_name(ip)
+                    Cont.save()
+                    Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
+                    # 添加网页内容，数据展示
+                except Exception as e:
+                    print('错误代码 [08] {}'.format(str(e)))
+                    Error_Log.objects.create(url='外键添加错误', error='错误代码 [08] {}'.format(str(e)))
 
             BA = Domains.objects.all()
             ALL_DOMAINS = [x.get('url') for x in BA.values()]
@@ -124,8 +126,6 @@ def Add_Data_To_Url(url):
             # print('所有域名：{}'.format(ALL_DOMAINS))
             This_Sub = [x for x in ALL_DOMAINS if x in url]
             # 获取到当前子域名属于的主域名
-
-
 
             try:
                 # 尝试进行域名总数据获取检测
@@ -153,14 +153,13 @@ def Add_Data_To_Url(url):
                 return
         if test_ip ==[]:
             try:
-
                 IP_Res = Get_Ip_Info(ip)
                 area = IP_Res.get_ip_address(ip)
                 cs_name = IP_Res.get_cs_name(ip)
                 IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
 
-                cs_ips = list(IP_Res.get_cs_ips(ip).values())[0]
+                cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
                 # 整个 C 段的数据ip
                 if ip in cs_ips:
                     cs_ips.remove(ip)
@@ -171,14 +170,14 @@ def Add_Data_To_Url(url):
                     if indata== [] and cs_ip != ip:
                         Read_to_check_host.add(cs_ip)
 
-                Alive_Hosts = IP_Res.get_alive_hosts(cs_ips)
-
+                Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
+                if Alive_Hosts == []:
+                    return
                 for alive_host in Alive_Hosts:
                     try:
                         checkindata = list(IP.objects.filter(ip=str(alive_host)))
                         if checkindata == [] :
-                            # 如果数据库c段没有这个ip
-                            # 说明存活
+                            # 最后一次数据判断匹配
                             c_ip = str(alive_host)
                             c_cs = cs_name
                             c_area = IP_Res.get_ip_address(c_ip)

@@ -197,7 +197,6 @@ class Get_Ip_Info:
             if stat == 1:
                 alive = True
         except Exception as e:
-            print(e)
             pass
         return alive
 
