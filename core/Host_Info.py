@@ -202,10 +202,10 @@ class Get_Ip_Info:
 
     def get_alive_hosts(self,hosts):
         result = set()
-        for host in hosts:
-            alive = self.check_ip_alive(host)
-            if alive == True:
-                result.add(host)
+        with ProcessPoolExecutor(max_workers=pool_count) as p:
+            future_tasks = [p.submit(self.check_ip_alive, i) for i in hosts]
+        result = [obj.result() for obj in future_tasks if obj.result() is True]
+
         return list(result)
 
     def get_server_from_nmap(self,ip):
