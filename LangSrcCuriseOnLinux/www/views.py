@@ -276,7 +276,7 @@ def show(request):
             else:
                 return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts,'c_counts':c_counts})
     except:
-        return render(request, '404.html')
+        return render(request, 'nodata.html')
 
 @login_required
 def search(request):

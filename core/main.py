@@ -155,10 +155,11 @@ def Add_Data_To_Url(url):
 
                 cs_ips = list(IP_Res.get_cs_ips(ip).values())[0]
                 # 整个 C 段的数据ip
+
                 for cs_ip in cs_ips:
                     try:
                         check = list(IP.objects.filter(ip=str(cs_ip)))
-                        if list(check) == []:
+                        if list(check) == [] and cs_ip != ip:
                             # 如果数据库c段没有这个ip，就检测存活然后添加数据库
                             if IP_Res.check_ip_alive(str(cs_ip)) == True:
                                 # 说明存活
