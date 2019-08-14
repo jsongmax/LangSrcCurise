@@ -25,6 +25,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 将当前目录下的 LangSrcCuriseOnLinux 文件夹单独保存到其他目录下
 
+随后执行一切命令代码皆在此 LangSrcCuriseOnLinux 目录下执行操作
 
 ## Linux 用户
 
