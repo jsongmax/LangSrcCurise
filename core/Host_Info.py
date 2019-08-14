@@ -73,7 +73,7 @@ def Get_Alive_Url(urls):
         Get_Alive_Url(urls)
         返回结果是一个列表，列表内数据为字典 多个自带你 {网址：标题}
     '''
-    with ThreadPoolExecutor() as p:
+    with ThreadPoolExecutor(max_workers=pool_count) as p:
         future_tasks = [p.submit(Requests, i) for i in urls]
     result = [obj.result() for obj in future_tasks if obj.result() is not None]
     # print(result)
@@ -189,13 +189,13 @@ class Get_Ip_Info:
 
     def check_ip_alive(self,ip):
         # 存活返回true 否则返回false
-        alive = False
+        alive = None
         try:
             nm = nmap.PortScanner()
             res = nm.scan(hosts=ip, arguments='-sn -PE -n')
             stat = int(res['nmap']['scanstats']['uphosts'])
             if stat == 1:
-                alive = True
+                alive = ip
         except Exception as e:
             pass
         return alive
@@ -204,7 +204,7 @@ class Get_Ip_Info:
         result = set()
         with ProcessPoolExecutor(max_workers=pool_count) as p:
             future_tasks = [p.submit(self.check_ip_alive, i) for i in hosts]
-        result = [obj.result() for obj in future_tasks if obj.result() is True]
+        result = [obj.result() for obj in future_tasks if obj.result()]
 
         return list(result)
 
