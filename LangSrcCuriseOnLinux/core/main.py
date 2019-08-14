@@ -171,6 +171,7 @@ def Add_Data_To_Url(url):
                         Read_to_check_host.add(cs_ip)
 
                 Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
+                print('[+ CHost Scaner] {} 段存活主机 : {}台'.format(cs_name,len(Alive_Hosts)))
                 if Alive_Hosts == []:
                     return
                 for alive_host in Alive_Hosts:
