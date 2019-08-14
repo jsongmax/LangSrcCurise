@@ -88,7 +88,9 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 编辑域名：在 initialize 文件夹 编辑 domains.list 文件
 
-执行命令：在 initialize 文件夹 执行代码 python3 Update_Domains.py
+执行命令：在 主目录 LangSrcCurise 文件夹下依次执行如下命令：
+
+1. python3 manage.py initial
 
 完成将监控域名初始化到数据库
 

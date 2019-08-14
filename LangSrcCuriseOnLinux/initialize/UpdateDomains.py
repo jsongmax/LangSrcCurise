@@ -73,9 +73,9 @@ class BeiAn:
 
         return self.result
 
-if __name__ == '__main__':
-    tasks = [x.strip() for x in open('domains.list','r').readlines()]
-
+def start():
+    Dicts = os.path.join('initialize', 'domains.list')
+    tasks = [x.strip() for x in open(Dicts,'r').readlines()]
     for task in tasks:
         try:
             print('当前检测URL：{}'.format(task))
@@ -92,3 +92,5 @@ if __name__ == '__main__':
             BA.save()
         except Exception as e:
             print(e)
+if __name__ == '__main__':
+    pass

@@ -5,6 +5,8 @@ import pymysql
 import contextlib
 import configparser
 
+from initialize.UpdateDomains import start
+
 cfg = configparser.ConfigParser()
 cfg.read('Config.ini')
 
@@ -36,6 +38,8 @@ with co_mysql(db='mysql') as cursor:
        cursor.execute('create database {}'.format(Dbname))
 
 if __name__ == '__main__':
+    if sys.argv[1] == 'initial':
+        start()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LangSrcCurise.settings')
     try:
         from django.core.management import execute_from_command_line
