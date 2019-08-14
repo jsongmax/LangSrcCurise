@@ -159,7 +159,7 @@ def Add_Data_To_Url(url):
                 for cs_ip in cs_ips:
                     try:
                         check = list(IP.objects.filter(ip=str(cs_ip)))
-                        if list(check) == [] and cs_ip != ip:
+                        if list(check) == [] and str(cs_ip) != ip:
                             # 如果数据库c段没有这个ip，就检测存活然后添加数据库
                             if IP_Res.check_ip_alive(str(cs_ip)) == True:
                                 # 说明存活
