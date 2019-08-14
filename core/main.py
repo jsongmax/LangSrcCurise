@@ -58,10 +58,6 @@ def Add_Data_To_Url(url):
     time.sleep(random.randint(1,20))
     time.sleep(random.randint(1,20))
     time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
     try:
         ip = get_host(url)
         if ip == '获取失败':
@@ -100,6 +96,9 @@ def Add_Data_To_Url(url):
             #     return
 
             # 接下来可以进行数据索引唯一统一
+            '''
+            这里添加网址资产到 索引表 和 清洗表
+            '''
             test_url1 = list(URL.objects.filter(url=url))
             # 如果数据库有这个网站的话，就直接退出
 
@@ -178,7 +177,7 @@ def Add_Data_To_Url(url):
                     try:
                         checkindata = list(IP.objects.filter(ip=str(alive_host)))
                         if checkindata == [] :
-                            # 最后一次数据判断匹配
+                            # 最后一次数据判断校验
                             c_ip = str(alive_host)
                             c_cs = cs_name
                             c_area = IP_Res.get_ip_address(c_ip)
@@ -201,8 +200,6 @@ def Change_IP_Info():
     while 1:
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
-        time.sleep(random.randint(1,20))
-        time.sleep(random.randint(1,20))
         try:
             target_ip = IP.objects.filter(get='否')[0]
             ip = target_ip.ip
@@ -211,7 +208,7 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
-            time.sleep(3600)
+            time.sleep(360)
             # 等待并充实一次
             try:
                 target_ip = IP.objects.filter(get='否')[0]
@@ -257,9 +254,6 @@ def Change_IP_Info():
 
 def Change_ShowData_Info(Sub_Domains):
     while 1:
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         # 线程同步
@@ -392,9 +386,6 @@ def Sub_Brute(Sub_Domains):
 
 def Run_Crawl(Domains):
     while 1:
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         try:

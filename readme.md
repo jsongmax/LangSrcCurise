@@ -1,3 +1,9 @@
+# 2019年8月14日21点16分
+
+当前版本使用的数据库为mysql8.0，以后更新将长期使用MySQL8.0版本，如需使用本地数据库sqlite3，可以下载最后一个sqlite3版本
+
+[下载地址](https://github.com/LangziFun/LangSrcCurise/tree/41d2848b7c59ea0e97e94e38618abd61a7cbaea4)
+
 # 前言
 
 LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信息收集整理的自动化资产监控管理系统，基于Django开发。
