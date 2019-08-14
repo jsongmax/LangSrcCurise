@@ -7,6 +7,7 @@
 """
 from django.db import models
 
+
 class IP(models.Model):
     uid = models.AutoField(primary_key=True)
     ip = models.CharField(max_length=15,unique=True,verbose_name='IP地址',)
@@ -14,6 +15,7 @@ class IP(models.Model):
     host_type = models.CharField(max_length=10,verbose_name='操作系统')
     alive_urls = models.TextField(verbose_name='部署网站')
     area = models.CharField(max_length=10,verbose_name='IP归属')
+    cs = models.CharField(max_length=20,default='暂无信息',verbose_name='隶属C段')
     get = models.CharField(max_length=1,default='否',verbose_name='是否校验')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     
@@ -95,6 +97,8 @@ class Show_Data(models.Model):
     content = models.ForeignKey('Content',on_delete=models.DO_NOTHING,verbose_name='网页内容')
 
     ip = models.CharField(max_length=15,verbose_name='IP地址')
+    cs = models.CharField(max_length=20,default='暂无信息',verbose_name='隶属C段')
+
     servers = models.TextField(default='None',verbose_name='端口服务')
     alive_urls = models.TextField(default='None',verbose_name='部署网站')
     host_type = models.CharField(max_length=10,default='None',verbose_name='操作系统')

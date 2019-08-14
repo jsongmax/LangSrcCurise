@@ -164,7 +164,7 @@ def login_out(request):
 def add_url(request):
     user = request.session['user']
     privi = User.objects.filter(username=user)[0]
-    if privi.privileges == '否':
+    if privi.privileges == 'no':
         return HttpResponse('<script>alert("当前账户没有添加资产数据权限")</script>')
     domain = request.GET.get('url')
     BA = Domains.objects.all()
@@ -187,12 +187,12 @@ def add_url(request):
 def add_ip(request):
     user = request.session['user']
     privi = User.objects.filter(username=user)[0]
-    if privi.privileges == '否':
+    if privi.privileges == 'no':
         return HttpResponse('<script>alert("当前账户没有添加资产数据权限")</script>')
     domain = request.GET.get('ip')
     ip_res = list(IP.objects.filter(ip=domain))
     if ip_res == []:
-        IP.objects.create(ip=domain, servers='None', host_type='None', alive_urls='None', area='北京')
+        IP.objects.create(ip=domain, servers='None', host_type='None', alive_urls='None', area="('北京','北京')")
         return render(request,'add_ip.html',{'domain':domain})
     else:
         return HttpResponse('<script>alert("数据库已存在该IP数据，请勿重复添加")</script>')
@@ -256,23 +256,25 @@ def show(request):
         if KEY == 'url':
             Res = Show_Data.objects.filter(url=VALUE)[0]
             ip_counts = len(Other_Url.objects.filter(ip=Res.ip))
+            c_counts = len(IP.objects.filter(cs=Res.cs))
 
             check = Res.check
             if check == '否':
                 total = '1'
-                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts})
+                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts,'c_counts':c_counts})
             else:
-                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts})
+                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts,'c_counts':c_counts})
         if KEY == 'ip':
             Res = Show_Data.objects.filter(ip=VALUE)[0]
             ip_counts = len(Other_Url.objects.filter(ip=Res.ip))
+            c_counts = len(IP.objects.filter(cs=Res.cs))
 
             check = Res.check
             if check == '否':
                 total = '1'
-                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts})
+                return render(request, 'result.html', {'bea_list': Res,'totla':total,'ip_counts':ip_counts,'c_counts':c_counts})
             else:
-                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts})
+                return render(request, 'result.html', {'bea_list': Res,'ip_counts':ip_counts,'c_counts':c_counts})
     except:
         return render(request, '404.html')
 
@@ -402,6 +404,23 @@ def search(request):
             return render(request, 'show.html', {'bea_list': beatles_list,
                                                  'counts':counts,
                                                  'dbname':'网络资产',
+                                                 'key':KEY,
+                                                 'value':VALUE})
+        if KEY == 'cip':
+            Res = IP.objects.filter(cs=VALUE).values()
+            counts = len(Res)
+
+            paginator = Paginator(Res, 5)
+            page = request.GET.get('page')
+            try:
+                beatles_list = paginator.page(page)
+            except PageNotAnInteger:
+                beatles_list = paginator.page(1)
+            except EmptyPage:
+                beatles_list = paginator.page(paginator.num_pages)
+            return render(request, 'show.html', {'bea_list': beatles_list,
+                                                 'counts':counts,
+                                                 'dbname':'主机端口',
                                                  'key':KEY,
                                                  'value':VALUE})
 

@@ -5,7 +5,7 @@
 @time: 2019/8/5 22:47
 @file: 获取IP信息.py
 """
-# import IPy
+import IPy
 import nmap
 import socket
 socket.setdefaulttimeout(25)
@@ -108,6 +108,21 @@ class Get_Ip_Info:
         a = Get_Ip_Info('118.24.11.235')
         print(a.get_host_type('118.24.11.235'))
         识别失败返回’识别失败‘，否则返回主机类型 Windows
+
+    检查ip是否存活
+        a = Get_Ip_Info('118.24.11.235')
+        print(a.check_ip_alive('118.24.11.235'))
+        存活返回true 否则返回false
+
+    获取传入ip的C段名 以及C段ip
+            a = Get_Ip_Info('118.24.11.235')
+            print(a.cs_ips('118.24.11.235'))
+            返回
+            {'118.24.11.0/24',[118.24.11.1,118.24.11.2..........]}
+
+    获取传入ip的C段名
+                a = Get_Ip_Info('118.24.11.235')
+                print(a.cs_name('118.24.11.235'))
     '''
 
     def __init__(self,ip):
@@ -154,6 +169,30 @@ class Get_Ip_Info:
         except:
             pass
         return alive_host
+
+    def get_cs_name(self,ip):
+        return '.'.join(str(ip).split('.')[0:-1])+'.0/24'
+
+    def get_cs_ips(self,ip):
+        res = {}
+        cs_name = '.'.join(str(ip).split('.')[0:-1])+'.0/24'
+        cs_ip = list(IPy.IP(cs_name))
+        res[cs_name] = cs_ip
+        return res
+
+    def check_ip_alive(self,ip):
+        # 存活返回true 否则返回false
+        alive = False
+        try:
+            nm = nmap.PortScanner()
+            res = nm.scan(hosts=ip, arguments='-sn -PE -n')
+            stat = int(res['nmap']['scanstats']['uphosts'])
+            if stat == 1:
+                alive = True
+        except Exception as e:
+            print(e)
+            pass
+        return alive
 
     def get_server_from_nmap(self,ip):
         result = {}

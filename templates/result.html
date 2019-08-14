@@ -31,8 +31,15 @@
 
     <form  method="GET" action="{%url 'search'%}">
         {%csrf_token%}
-        <button type="submit" class="btn btn-warning btn-lg" name="gip" value="{{bea_list.ip}}">查看同IP站点|{{ip_counts}}个</button>
+        <button type="submit" class="btn btn-warning btn-lg" name="gip" value="{{bea_list.ip}}">该IP部署站点|{{ip_counts}}个</button>
     </form></h2>
+
+    <form  method="GET" action="{%url 'search'%}">
+        {%csrf_token%}
+        <button type="submit" class="btn btn-info btn-lg" name="cip" value="{{bea_list.cs}}">C  段存活主机|{{c_counts}}个</button>
+    </form></h2>
+
+
 </td>
         </tr>
                 <td><h3>开放服务：</td><td><h3>{{bea_list.servers}}</td>
@@ -44,6 +51,9 @@
                 <td><h3>归属地区：</td><td><h3>{{bea_list.area}}</td>
         </tr>
                 <td><h3>隶属域名：</td><td><h3>{{bea_list.belong_domain}}</td>
+                </tr>
+                <td><h3>隶属C段：</td><td><h3>{{bea_list.cs}}</td>
+
         </tr>
                 <td><h3>修改时间：</td><td><h3>{{bea_list.change_time}}</td>
         </tr>

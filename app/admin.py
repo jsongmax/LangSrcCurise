@@ -30,9 +30,9 @@ xadmin.site.register(views.BaseAdminView, BaseSetting)
 
 class x_show_data(object):
     """设置显示字段"""
-    list_display = ['uid','url','title','power','server','status','ip','area','servers','alive_urls','host_type','belong_domain','success','check','change_time']
+    list_display = ['uid','url','title','power','server','status','ip','cs','area','servers','alive_urls','host_type','belong_domain','success','check','change_time']
     model_icon = 'fa fa-flag'
-    search_fields = ['url','title','power','server','status','ip','area','servers','alive_urls','host_type','belong_domain','success','check','change_time']
+    search_fields = ['url','title','power','server','status','ip','cs','area','servers','alive_urls','host_type','belong_domain','success','check','change_time']
     refresh_times = (30, 60)
     # list_bookmarks = [{
     #     'title': "北京",  # 书签的名称, 显示在书签菜单中
@@ -77,10 +77,10 @@ class x_domains(object):
 xadmin.site.register(Domains,x_domains)
 
 class x_ip(object):
-    list_display = ['uid','ip','servers','host_type','alive_urls','area','get','change_time']
+    list_display = ['uid','ip','servers','host_type','alive_urls','area','cs','get','change_time']
     model_icon = 'fa fa-linux'
 
-    search_fields = ['uid','ip','servers','host_type','alive_urls','area','get','change_time']
+    search_fields = ['uid','ip','servers','host_type','alive_urls','area','cs','get','change_time']
     refresh_times = (30, 60)
 
     # data_charts = {

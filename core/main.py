@@ -100,8 +100,10 @@ def Add_Data_To_Url(url):
                 Cont = Content()
                 Cont.url = url
                 Cont.content = Show_contents
+                IP_Res = Get_Ip_Info(ip)
+                Show_cs = IP_Res.get_cs_name(ip)
                 Cont.save()
-                Show_Data.objects.create(url=url, ip=ip, content=Cont)
+                Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                 # 添加网页内容，数据展示
             except Exception as e:
                 print('错误代码 [08] {}'.format(str(e)))
@@ -144,10 +146,31 @@ def Add_Data_To_Url(url):
                 return
         if test_ip ==[]:
             try:
+
                 IP_Res = Get_Ip_Info(ip)
                 area = IP_Res.get_ip_address(ip)
-                IP.objects.create(ip=ip, servers='None', host_type='None', alive_urls='None', area=area)
+                cs_name = IP_Res.get_cs_name(ip)
+                IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
+
+                cs_ips = list(IP_Res.get_cs_ips(ip).values())[0]
+                # 整个 C 段的数据ip
+                for cs_ip in cs_ips:
+                    try:
+                        check = list(IP.objects.filter(ip=str(cs_ip)))
+                        if list(check) == []:
+                            # 如果数据库c段没有这个ip，就检测存活然后添加数据库
+                            if IP_Res.check_ip_alive(str(cs_ip)) == True:
+                                # 说明存活
+                                c_ip = str(cs_ip)
+                                c_cs = cs_name
+                                c_area = IP_Res.get_ip_address(c_ip)
+                                IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
+                                                  area=c_area)
+                    except Exception as e:
+                        print('错误代码 [03] {}'.format(str(e)))
+                        Error_Log.objects.create(url=url, error='错误代码 [03] {}'.format(str(e)))
+
             except Exception as e:
                 print('错误代码 [21] {}'.format(str(e)))
                 Error_Log.objects.create(url=url, error='错误代码 [21] {}'.format(str(e)))
@@ -161,6 +184,8 @@ def Change_IP_Info():
     while 1:
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
+        time.sleep(random.randint(1,20))
+        time.sleep(random.randint(1,20))
         try:
             target_ip = IP.objects.filter(get='否')[0]
             ip = target_ip.ip
@@ -169,7 +194,7 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
-            time.sleep(600)
+            time.sleep(3600)
             # 等待并充实一次
             try:
                 target_ip = IP.objects.filter(get='否')[0]
@@ -196,6 +221,7 @@ def Change_IP_Info():
         # windows/linux
         area = IP_Res.get_ip_address(ip)
         # 返回地址
+        cs = IP_Res.get_cs_name(ip)
 
         IP_Obj = IP.objects.filter(ip=ip)[0]
         IP_Obj.ip = ip
@@ -203,6 +229,7 @@ def Change_IP_Info():
         IP_Obj.host_type = host_type
         IP_Obj.alive_urls = str(alive_url)
         IP_Obj.area = area
+        IP_Obj.cs = cs
         IP_Obj.get = '是'
         try:
             IP_Obj.save()
@@ -226,7 +253,7 @@ def Change_ShowData_Info(Sub_Domains):
             Data_IP = IP.objects.filter(ip=ip)[0]
             if Data_IP.get == '否' or Data_IP.get == '中':
                 # 如果收集整理的数据还没有获取完成
-                time.sleep(3600)
+                time.sleep(600)
                 return
             else:
                 target_info.get = '中'
@@ -277,6 +304,10 @@ def Change_ShowData_Info(Sub_Domains):
             # 旁站
             Show_host_type = Data_IP.host_type
             Show_area = Data_IP.area
+            Show_cs = Data_IP.cs
+            # IP_Res = Get_Ip_Info(ip)
+            # Show_cs = IP_Res.get_cs_name(ip)
+
             Show_belong_domain = [x for x in Sub_Domains if x in url]
             if Show_belong_domain == []:
                 Show_belong_domain = 'None'
@@ -292,6 +323,7 @@ def Change_ShowData_Info(Sub_Domains):
             ShowS_DataD.status = Show_status
             # ShowS_DataD.content = Cont
             ShowS_DataD.servers = Show_servers
+            ShowS_DataD.cs = Show_cs
             ShowS_DataD.alive_urls = Show_alive_urls
             ShowS_DataD.host_type = Show_host_type
             ShowS_DataD.area = Show_area
