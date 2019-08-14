@@ -1,5 +1,33 @@
 # coding:utf-8
 from core.main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
+import pymysql
+import contextlib
+import configparser
+
+cfg = configparser.ConfigParser()
+cfg.read('Config.ini')
+
+host = cfg.get("Server", "host")
+username = cfg.get("Server", "username")
+password = cfg.get("Server", "password")
+Dbname = cfg.get("Server","dbname").lower()
+port = int(cfg.get("Server","port"))
+
+
+@contextlib.contextmanager
+def co_mysql(db='mysql'):
+    conn = pymysql.connect(host=host,user=username,password=password,port=port,db=db,charset='utf8')
+    cursor = conn.cursor()
+    try:
+        yield cursor
+    except:
+        print('\n[警告] 数据库连接失败 请检查mysql数据库是否正确安装并开启\n\n')
+    finally:
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
 
 import threading
 import django
@@ -39,6 +67,10 @@ if __name__ == '__main__':
     print('Main Console Start Running....')
     try:
         print('\n开始自检数据库配置文件数据')
+        with co_mysql(db='mysql') as cursor:
+            row_count = cursor.execute("show databases;")
+            a = cursor.fetchall()
+
         Set = Setting.objects.all()[0]
         pool_count = int(Set.Pool)
         Alive_Status = eval(Set.Alive_Code)

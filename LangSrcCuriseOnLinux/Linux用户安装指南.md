@@ -3,6 +3,7 @@
 1. sudo apt-get install python3.6
 2. sudo apt-get install nmap
 3. sudo python3 -m pip install -r requirement.txt
+4. 安装mysql8.0，步骤较多，自行百度
 
 剩下的按照上层文件夹readme初始化数据库即可,**注意linxu系统必须要有权限，即每次启动都要加上sudo**
 
@@ -13,6 +14,7 @@
 1. 安装python3.6
 2. 安装nmap并添加到环境变量
 3. python3 -m pip install -r requirement.txt
+4. 建议安装最新版phpstudy，自带mysql8.0
 
 
 # 提醒

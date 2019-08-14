@@ -9,8 +9,21 @@ https://docs.djangoproject.com/en/2.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
-
 import os
+import pymysql         # 一定要添加这两行！通过pip install pymysql！
+pymysql.install_as_MySQLdb()
+
+import pymysql
+import configparser
+import contextlib
+cfg = configparser.ConfigParser()
+cfg.read('Config.ini')
+
+host = cfg.get("Server", "host")
+username = cfg.get("Server", "username")
+password = cfg.get("Server", "password")
+Dbname = cfg.get("Server","dbname")
+port = int(cfg.get("Server","port"))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -83,10 +96,22 @@ WSGI_APPLICATION = 'LangSrcCurise.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': Dbname,
+        'HOST': host,
+        'USER': username,
+        'PASSWORD': password,
+        'PORT': str(port),
     }
 }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 
 # Password validation

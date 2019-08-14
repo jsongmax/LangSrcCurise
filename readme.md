@@ -6,6 +6,13 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 个人以为，类似于WEB服务的系统，最好的打包方案就是把所有需要的库保存在本地，每次在迁移环境和配置使用都可以非常简便，并且WEB应用依赖的第三方库有时如果更新了可能会导致不匹配，所以该项目安装环境分两种，第一种是将所有需要的库都打包在本地文件，无需再安装其他相关库，但是**这种方法只通用于windows**。第二种方法是自行安装相关库，适配Windows/Linux。
 
+# 需要环境
+
+1. python==3.6
+2. mysql==8.0
+3. nmap==7.8
+4. django==2.1.1
+
 # 项目进度
 
 目前完成后端60%功能，前端已经完成40%功能，不过核心可以开始运作，剩下的会在后期慢慢更新。
@@ -15,6 +22,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 最好是在一个全新的环境安装
 
 1. 安装软件  python3.6     注意必须为 3.6
+2. 安装软件  mysql5.7及以上   注意必须是5.7或者以上，建议安装mysql8.0
 2. 执行命令  python3 -m pip install django==2.1.1,或者在本地 Need_Packages 解压django后执行命令python3 setup.py install
 3. Windows  安装Nmap 并添加到系统环境变量,windows安装nmap可能需要安装目录下 Need_Packages/WinPcap_4_1_3.exe 
 
@@ -34,6 +42,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. sudo apt-get install python3.6
 2. sudo apt-get install nmap
 3. sudo python3 -m pip install -r requirement.txt
+4. 安装mysql8.0，步骤较多，自行百度
 
 **注意：在linux下执行任何生成数据库，启动任何服务命令前都需要加上 sudo**
 
@@ -45,10 +54,27 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. 安装python3.6
 2. 安装nmap并添加到环境变量
 3. python3 -m pip install -r requirement.txt
+4. 建议安装最新版phpstudy，自带mysql8.0
 
 注意第二种安装方法可能会因为网络宽带等原因，安装相关库失败。
 
 # 开始使用
+
+## 开启mysql服务
+
+1. 第一步先开启mysql服务，并且允许用户连接
+
+## 配置数据库信息
+
+在主目录下的 Config.ini 文件中修改相关mysql登陆信息
+
+	[Server]
+	host = 127.0.0.1 # mysql登陆的ip
+	port = 3306		# mysql 端口
+	username = root
+	password = root
+	dbname = LangSrcCurise # 你要是用的数据库名字，数据库自动创建
+
 
 ## 初始化数据库
 
@@ -57,8 +83,6 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. python3 manage.py makemigrations
 2. python3 manage.py migrate
 3. python3 manage.py createsuperuser # 按照提示注册生成管理员账号密码
-
-**注意：如果是linux，这里需要给本地数据库权限，执行命令 sudo chmod 666 db.sqlite3**
 
 ## 初始化监控域名
 
@@ -130,13 +154,15 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 如果需要删除所有的数据库，然后重新开始扫描，执行如下步骤：
 
-1. 删除 LangSrcCurise 文件夹下方的 db.sqlite3
+1. 直接在数据库中删除，或者在config.ini将数据库名修改成一个新的名字
 1. 执行命令 python3 manage.py makemigrations
 2. 执行命令 python3 manage.py migrate
 3. 执行命令 python3 manage.py createsuperuser # 按照提示注册生成管理员账号密码
 
 
 前面步骤设置完毕后，每次如果需要启动，可以如下步骤：
+
+启动mysql：sudo service mysql start
 
 启动WEB：python3 manage.py runserver 0:8888
 
@@ -236,7 +262,9 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 部署在服务器，数据可以给小弟小妹们用，给他们生成几个用户账号让他们happy。
 
+**不建议使用服务器扫描资产**
+
 自己使用超级管理员账号，如果只是想要简单的检索数据，在后端直接操作搜索即可，还可以导出各种格式的数据文件。
 
-在服务器不建议开启扫描任务，开个WEB服务即可，扫描结果数据库可以本地扫后迁移到服务器，即直接复制sqlite3替换到服务即可。
+在服务器不建议开启扫描任务，开个WEB服务即可，扫描结果数据库可以本地扫后迁移到服务器.
 
