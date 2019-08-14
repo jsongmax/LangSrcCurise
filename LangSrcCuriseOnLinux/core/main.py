@@ -362,19 +362,19 @@ def Run_Crawl(Domains):
                 Error_Log.objects.create(url='获取URL失败', error='错误代码 [31] {}'.format(str(e)))
                 return
         try:
-            All_Urls = Crawl(url)
+            All_Urls = set(Crawl(url))
             Other_Domains = []
-            if All_Urls != []:
+            if list(All_Urls) != []:
                 try:
-                    Sub_Domains1 = list(set([y for x in Domains for y in All_Urls if x in y]))
-                    if Sub_Domains1 != []:
+                    Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
+                    if list(Sub_Domains1) != []:
                         with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                            result = pool.map(Add_Data_To_Url, Sub_Domains1)
-                    Other_Domains = list(set([y for x in Domains for y in All_Urls if x not in y]))
+                            result = pool.map(Add_Data_To_Url, list(Sub_Domains1))
+                    Other_Domains = list(All_Urls-Sub_Domains1)
                 except Exception as e:
                     print('错误代码 [11] {}'.format(str(e)))
                     Error_Log.objects.create(url=url, error='错误代码 [11] {}'.format(str(e)))
-                if Other_Domains != [] and Other_Domains != None:
+                if Other_Domains != []:
                     for urle in Other_Domains:
                         try:
                             Test_Other_Url = list(Other_Url.objects.filter(url=urle))
