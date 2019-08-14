@@ -160,7 +160,7 @@ def Add_Data_To_Url(url):
                 IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
 
-                cs_ips = list(IP_Res.get_cs_ips(ip).values())[0]
+                cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
                 # 整个 C 段的数据ip
                 if ip in cs_ips:
                     cs_ips.remove(ip)
