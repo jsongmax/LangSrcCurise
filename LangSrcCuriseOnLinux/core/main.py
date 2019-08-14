@@ -55,6 +55,13 @@ def get_host(url):
 
 
 def Add_Data_To_Url(url):
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
     try:
         ip = get_host(url)
         if ip == '获取失败':
@@ -155,19 +162,28 @@ def Add_Data_To_Url(url):
 
                 cs_ips = list(IP_Res.get_cs_ips(ip).values())[0]
                 # 整个 C 段的数据ip
+                if ip in cs_ips:
+                    cs_ips.remove(ip)
 
+                Read_to_check_host = set()
                 for cs_ip in cs_ips:
+                    indata = list(IP.objects.filter(ip=str(cs_ip)))
+                    if indata== [] and cs_ip != ip:
+                        Read_to_check_host.add(cs_ip)
+
+                Alive_Hosts = IP_Res.get_alive_hosts(cs_ips)
+
+                for alive_host in Alive_Hosts:
                     try:
-                        check = list(IP.objects.filter(ip=str(cs_ip)))
-                        if list(check) == [] and str(cs_ip) != ip:
-                            # 如果数据库c段没有这个ip，就检测存活然后添加数据库
-                            if IP_Res.check_ip_alive(str(cs_ip)) == True:
-                                # 说明存活
-                                c_ip = str(cs_ip)
-                                c_cs = cs_name
-                                c_area = IP_Res.get_ip_address(c_ip)
-                                IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
-                                                  area=c_area)
+                        checkindata = list(IP.objects.filter(ip=str(alive_host)))
+                        if checkindata == [] :
+                            # 如果数据库c段没有这个ip
+                            # 说明存活
+                            c_ip = str(alive_host)
+                            c_cs = cs_name
+                            c_area = IP_Res.get_ip_address(c_ip)
+                            IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
+                                              area=c_area)
                     except Exception as e:
                         print('错误代码 [03] {}'.format(str(e)))
                         Error_Log.objects.create(url=url, error='错误代码 [03] {}'.format(str(e)))

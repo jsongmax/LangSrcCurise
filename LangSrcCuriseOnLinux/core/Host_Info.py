@@ -123,6 +123,10 @@ class Get_Ip_Info:
     获取传入ip的C段名
                 a = Get_Ip_Info('118.24.11.235')
                 print(a.cs_name('118.24.11.235'))
+
+    获取一个传入列表返回存货主机
+
+    get_alive_hosts([xxx.xxx.xx.x,xx.x.xx])
     '''
 
     def __init__(self,ip):
@@ -173,6 +177,9 @@ class Get_Ip_Info:
     def get_cs_name(self,ip):
         return '.'.join(str(ip).split('.')[0:-1])+'.0/24'
 
+
+
+
     def get_cs_ips(self,ip):
         res = {}
         cs_name = '.'.join(str(ip).split('.')[0:-1])+'.0/24'
@@ -193,6 +200,14 @@ class Get_Ip_Info:
             print(e)
             pass
         return alive
+
+    def get_alive_hosts(self,hosts):
+        result = set()
+        for host in hosts:
+            alive = self.check_ip_alive(host)
+            if alive == True:
+                result.add(host)
+        return list(result)
 
     def get_server_from_nmap(self,ip):
         result = {}
