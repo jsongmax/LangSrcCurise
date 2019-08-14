@@ -392,6 +392,11 @@ def Sub_Brute(Sub_Domains):
 
 def Run_Crawl(Domains):
     while 1:
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
         try:
             target_url = URL.objects.filter(get='否')[0]
             url = target_url.url

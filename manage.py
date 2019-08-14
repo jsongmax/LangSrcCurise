@@ -36,6 +36,8 @@ with co_mysql(db='mysql') as cursor:
        pass
    else:
        cursor.execute('create database {}'.format(Dbname))
+       cursor.execute("SET @@global.sql_mode= '';")
+       cursor.execute('ALTER DATABASE {} DEFAULT CHARACTER SET utf8mb4'.format(Dbname))
 
 if __name__ == '__main__':
     if sys.argv[1] == 'initial':

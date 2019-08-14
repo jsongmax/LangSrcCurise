@@ -14,7 +14,7 @@ class IP(models.Model):
     servers = models.TextField(verbose_name='端口服务')
     host_type = models.CharField(max_length=10,verbose_name='操作系统')
     alive_urls = models.TextField(verbose_name='部署网站')
-    area = models.CharField(max_length=10,verbose_name='IP归属')
+    area = models.CharField(max_length=100,verbose_name='IP归属')
     cs = models.CharField(max_length=20,default='暂无信息',verbose_name='隶属C段')
     get = models.CharField(max_length=1,default='否',verbose_name='是否校验')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -29,10 +29,10 @@ class IP(models.Model):
 class Domains(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=30, unique=True, verbose_name='域名')
-    BA_sex = models.CharField(max_length=30,default='企业', verbose_name='性质')
-    BA_name = models.CharField(max_length=30, verbose_name='名称')
-    BA_id = models.CharField(max_length=30, verbose_name='编号')
-    counts = models.CharField(max_length=6, default=0, verbose_name='捕获数量')
+    BA_sex = models.CharField(max_length=50,default='企业', verbose_name='性质')
+    BA_name = models.CharField(max_length=50, verbose_name='名称')
+    BA_id = models.CharField(max_length=50, verbose_name='编号')
+    counts = models.CharField(max_length=7, default=0, verbose_name='捕获数量')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
 
     class Meta:
@@ -41,7 +41,7 @@ class Domains(models.Model):
         verbose_name_plural = verbose_name
 
 class Content(models.Model):
-    url = models.CharField(max_length=30,unique=True,verbose_name='索引网址')
+    url = models.CharField(max_length=50,unique=True,verbose_name='索引网址')
     content = models.TextField(verbose_name='网页内容')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     class Meta:
@@ -51,7 +51,7 @@ class Content(models.Model):
 
 class URL(models.Model):
     uid = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=30,unique=True,verbose_name='索引网址')
+    url = models.CharField(max_length=50,unique=True,verbose_name='索引网址')
     get = models.CharField(max_length=1,default='否',verbose_name='是否爬行')
     ip = models.CharField(max_length=15,verbose_name='IP地址')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -62,10 +62,10 @@ class URL(models.Model):
 
 class Other_Url(models.Model):
     uid = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=30,unique=True,verbose_name='爬行网址')
-    title = models.CharField(max_length=60, default='None',verbose_name='网站标题')
-    power = models.CharField(max_length=10, default='None',verbose_name='容器/语言')
-    server = models.CharField(max_length=10, default='None',verbose_name='服务器类型')
+    url = models.CharField(max_length=100,unique=True,verbose_name='爬行网址')
+    title = models.CharField(max_length=120, default='None',verbose_name='网站标题')
+    power = models.CharField(max_length=50, default='None',verbose_name='容器/语言')
+    server = models.CharField(max_length=50, default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
     ip = models.CharField(max_length=15,verbose_name='IP地址')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -89,10 +89,10 @@ class Setting(models.Model):
 
 class Show_Data(models.Model):
     uid = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=30,unique=True,verbose_name='展示网址')
-    title = models.CharField(max_length=60,default='None',verbose_name='网站标题')
-    power = models.CharField(max_length=10,default='None',verbose_name='容器/语言')
-    server = models.CharField(max_length=10,default='None',verbose_name='服务器类型')
+    url = models.CharField(max_length=50,unique=True,verbose_name='展示网址')
+    title = models.CharField(max_length=100,default='None',verbose_name='网站标题')
+    power = models.CharField(max_length=50,default='None',verbose_name='容器/语言')
+    server = models.CharField(max_length=50,default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
     content = models.ForeignKey('Content',on_delete=models.DO_NOTHING,verbose_name='网页内容')
 
@@ -103,8 +103,8 @@ class Show_Data(models.Model):
     alive_urls = models.TextField(default='None',verbose_name='部署网站')
     host_type = models.CharField(max_length=10,default='None',verbose_name='操作系统')
     #baidu_url = models.TextField(verbose_name='百度搜索捕获网址')
-    area = models.CharField(max_length=10,default='None',verbose_name='IP归属')
-    belong_domain = models.CharField(max_length=10,db_index=True,default='None',verbose_name='所属域名')
+    area = models.CharField(max_length=50,default='None',verbose_name='IP归属')
+    belong_domain = models.CharField(max_length=15,db_index=True,default='None',verbose_name='所属域名')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     success = models.CharField(max_length=1,default='否',verbose_name='监控齐全')
     check = models.CharField(max_length=1,default='否',verbose_name='是否检测')
@@ -115,8 +115,8 @@ class Show_Data(models.Model):
 
 class Error_Log(models.Model):
     uid = models.AutoField(primary_key=True)
-    url = models.CharField(max_length=40,verbose_name='异常网址')
-    error = models.CharField(max_length=200,verbose_name='报错内容')
+    url = models.CharField(max_length=100,verbose_name='异常网址')
+    error = models.CharField(max_length=400,verbose_name='报错内容')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     class Meta:
         db_table = 'Error_Log'
@@ -126,8 +126,8 @@ class Error_Log(models.Model):
 
 class Cpu_Min(models.Model):
     uid = models.AutoField(primary_key=True)
-    cpu = models.CharField(max_length=5,verbose_name='CPU使用率')
-    menory = models.CharField(max_length=5,verbose_name='内存使用率')
+    cpu = models.CharField(max_length=15,verbose_name='CPU使用率')
+    menory = models.CharField(max_length=15,verbose_name='内存使用率')
     network_send = models.CharField(max_length=20,verbose_name='上传流量Mb/小时')
     network_recv = models.CharField(max_length=20,verbose_name='接收流量Mb/小时')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
