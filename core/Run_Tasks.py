@@ -1,5 +1,5 @@
 # coding:utf-8
-from main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
+from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
 import pymysql
 import contextlib
 import configparser
