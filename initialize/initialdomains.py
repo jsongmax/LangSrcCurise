@@ -73,7 +73,7 @@ class BeiAn:
 
         return self.result
 
-def start():
+def initialdomains():
     Dicts = os.path.join('initialize', 'domains.list')
     tasks = [x.strip() for x in open(Dicts,'r').readlines()]
     for task in tasks:

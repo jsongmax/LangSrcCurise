@@ -1,5 +1,5 @@
 # coding:utf-8
-from core.main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
+from main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
 import pymysql
 import contextlib
 import configparser
@@ -48,10 +48,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,os.path.join(BASE_DIR,'ExtrApps'))
 
 
-
-
-
-if __name__ == '__main__':
+def start():
     print('''
 
              _                           _
@@ -96,3 +93,7 @@ if __name__ == '__main__':
     while 1:
         Sub_Brute(Sub_Domains)
         time.sleep(3600*24)
+
+
+if __name__ == '__main__':
+    start()

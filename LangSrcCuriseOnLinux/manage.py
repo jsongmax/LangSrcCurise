@@ -5,7 +5,8 @@ import pymysql
 import contextlib
 import configparser
 
-from initialize.UpdateDomains import start
+from initialize.initialdomains import initialdomains
+from core.Run_Tasks import start
 
 cfg = configparser.ConfigParser()
 cfg.read('Config.ini')
@@ -41,15 +42,18 @@ with co_mysql(db='mysql') as cursor:
 
 if __name__ == '__main__':
     if sys.argv[1] == 'initial':
+        initialdomains()
+    elif sys.argv[1] == 'startscan':
         start()
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LangSrcCurise.settings')
-    try:
-        from django.core.management import execute_from_command_line
-    except ImportError as exc:
-        raise ImportError(
-            "Couldn't import Django. Are you sure it's installed and "
-            "available on your PYTHONPATH environment variable? Did you "
-            "forget to activate a virtual environment?"
-        ) from exc
-    execute_from_command_line(sys.argv)
+    else:
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LangSrcCurise.settings')
+        try:
+            from django.core.management import execute_from_command_line
+        except ImportError as exc:
+            raise ImportError(
+                "Couldn't import Django. Are you sure it's installed and "
+                "available on your PYTHONPATH environment variable? Did you "
+                "forget to activate a virtual environment?"
+            ) from exc
+        execute_from_command_line(sys.argv)
 

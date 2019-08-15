@@ -77,10 +77,10 @@ class Other_Url(models.Model):
 class Setting(models.Model):
     name = models.CharField(max_length=30,verbose_name='配置方案')
     Alive_Code = models.CharField(max_length=200,default='[200,301,302,401,402,500,503]',verbose_name='允许入库状态码')
-    Thread = models.CharField(max_length=4,default='4', verbose_name='线程数量')
-    Pool = models.CharField(max_length=4,default='8',  verbose_name='进程池量')
-    processes = models.CharField(max_length=4,default='4',  verbose_name='协程数量')
-    childconcurrency = models.CharField(max_length=4,default='4',  verbose_name='子协程数量')
+    Thread = models.CharField(max_length=4,default='2', verbose_name='线程数量')
+    Pool = models.CharField(max_length=4,default='2',  verbose_name='进程池量')
+    processes = models.CharField(max_length=4,default='2',  verbose_name='进程数量')
+    childconcurrency = models.CharField(max_length=4,default='2',  verbose_name='子协程数量')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     class Meta:
         db_table = 'Setting'
