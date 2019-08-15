@@ -5,8 +5,6 @@ import pymysql
 import contextlib
 import configparser
 
-from initialize.initialdomains import initialdomains
-from core.Run_Tasks import start
 
 cfg = configparser.ConfigParser()
 cfg.read('Config.ini')
@@ -42,8 +40,10 @@ with co_mysql(db='mysql') as cursor:
 
 if __name__ == '__main__':
     if sys.argv[1] == 'initial':
+        from initialize.initialdomains import initialdomains
         initialdomains()
     elif sys.argv[1] == 'startscan':
+        from core.Run_Tasks import start
         start()
     else:
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LangSrcCurise.settings')
