@@ -3,12 +3,12 @@ from django.db import models
 
 class User(models.Model):
     uid = models.AutoField(primary_key=True)
-    username = models.CharField(max_length=100,unique=True,verbose_name='用户账号')
-    password = models.CharField(max_length=100,verbose_name='用户密码')
-    userkey = models.CharField(max_length=100,verbose_name='用户口令')
-    last_login_ip = models.CharField(max_length=16,verbose_name='最后登陆IP')
+    username = models.CharField(max_length=100,unique=True,default='test',verbose_name='用户账号')
+    password = models.CharField(max_length=100,default='test',verbose_name='用户密码')
+    userkey = models.CharField(max_length=100,default='123456',verbose_name='用户口令')
+    last_login_ip = models.CharField(max_length=16,default='127.0.0.1',verbose_name='最后登陆IP')
     last_login_time = models.DateTimeField(auto_now=True,verbose_name='最后登陆时间')
-    privileges = models.CharField(max_length=2,choices = (('yes', '是'), ('no', '否')),default='是',verbose_name='是否拥有添加资产权限')
+    privileges = models.CharField(max_length=5,choices = (('yes', '是'), ('no', '否')),default='是',verbose_name='是否拥有添加资产权限')
     change_time = models.DateTimeField(auto_now_add=True,verbose_name='创建用户时间')
     class Meta:
         db_table = 'User'

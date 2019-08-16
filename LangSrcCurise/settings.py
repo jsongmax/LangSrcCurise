@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import pymysql         # һ��Ҫ��������У�ͨ��pip install pymysql��
+import pymysql
 pymysql.install_as_MySQLdb()
 
 import pymysql

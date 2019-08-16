@@ -49,7 +49,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 在主目录下的 config.ini 文件中修改相关mysql登陆信息
 
 	[Server]
-	host = 127.0.0.1 # mysql登陆的ip
+	host = 127.0.0.1 # mysql登陆的ip，linux下设置为localhost
 	port = 3306		# mysql 端口
 	username = root
 	password = root
