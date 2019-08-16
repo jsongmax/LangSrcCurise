@@ -8,7 +8,7 @@ from core.Subdomain_Crawl import Crawl
 from core.Url_Info import Get_Url_Info
 from core.Host_Info import Get_Ip_Info,Get_Alive_Url
 from core.Cor import Cor
-
+import pymysql
 import random
 import socket
 import django
@@ -55,6 +55,8 @@ def get_host(url):
 
 
 def Add_Data_To_Url(url):
+    time.sleep(random.randint(1,20))
+    time.sleep(random.randint(1,20))
     time.sleep(random.randint(1,20))
     try:
         ip = get_host(url)
@@ -104,7 +106,10 @@ def Add_Data_To_Url(url):
                 URL.objects.create(url=url,ip=ip)
                 # 添加 网址索引
                 try:
-                    Show_contents = Get_Url_Info(url).Requests()[0]
+                    try:
+                        Show_contents = pymysql.escape_string(Get_Url_Info(url).Requests()[0])
+                    except:
+                        Show_contents = 'Error'
                     Cont = Content()
                     Cont.url = url
                     Cont.content = Show_contents
@@ -220,7 +225,7 @@ def Change_IP_Info():
         try:
             cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
             cs_name = cs
-            # 整个 C 段的数据ip,扫描c开放端口
+            # 整个 C 段的数据ip
 
             if ip in cs_ips:
                 cs_ips.remove(ip)
@@ -357,8 +362,8 @@ def Sub_Baidu(Sub_Domains):
         for sub_domain in Sub_Domains:
             res = Baidu(sub_domain)
             if res != []:
-                with ProcessPoolExecutor(max_workers=pool_count) as pool2:
-                    result = pool2.map(Add_Data_To_Url, list(set(res)))
+                with ProcessPoolExecutor(max_workers=pool_count) as pool:
+                    result = pool.map(Add_Data_To_Url, list(set(res)))
             time.sleep(60)
             # 每次扫完一个域名等待一小会儿
         time.sleep(3600*12)
@@ -380,8 +385,8 @@ def Sub_Brute(Sub_Domains):
         res = Brute(domain).start()
         res = list(set(res))
         if res != []:
-            with ProcessPoolExecutor(max_workers=pool_count) as pool3:
-                result = pool3.map(Add_Data_To_Url, res)
+            with ProcessPoolExecutor(max_workers=pool_count) as pool:
+                result = pool.map(Add_Data_To_Url, res)
         # 每爆破一个子域名，歇会儿
         time.sleep(360)
 
@@ -446,11 +451,11 @@ def Run_Crawl(Domains):
 
 
 def Sub_Crawl(pax,Sub_Domains):
-    p1 = ProcessPoolExecutor(max_workers=pool_count)
+    p = ProcessPoolExecutor(max_workers=pool_count)
     for i in pax:
-        p1.submit(Run_Crawl,Sub_Domains)
-        p1.submit(Change_IP_Info)
-        p1.submit(Change_ShowData_Info,Sub_Domains)
+        p.submit(Run_Crawl,Sub_Domains)
+        p.submit(Change_IP_Info)
+        p.submit(Change_ShowData_Info,Sub_Domains)
 
 if __name__ == '__main__':
     pass
