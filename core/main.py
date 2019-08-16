@@ -158,35 +158,8 @@ def Add_Data_To_Url(url):
                 IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
 
-                cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
-                # 整个 C 段的数据ip
-                if ip in cs_ips:
-                    cs_ips.remove(ip)
-
-                Read_to_check_host = set()
-                for cs_ip in cs_ips:
-                    indata = list(IP.objects.filter(ip=str(cs_ip)))
-                    if indata== [] and cs_ip != ip:
-                        Read_to_check_host.add(cs_ip)
-
-                Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
-                print('[+ CHost Scaner] {} 段存活主机 : {}台'.format(cs_name,len(Alive_Hosts)))
-                if Alive_Hosts == []:
-                    return
-                for alive_host in Alive_Hosts:
-                    try:
-                        checkindata = list(IP.objects.filter(ip=str(alive_host)))
-                        if checkindata == [] :
-                            # 最后一次数据判断校验
-                            c_ip = str(alive_host)
-                            c_cs = cs_name
-                            c_area = IP_Res.get_ip_address(c_ip)
-                            IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
-                                              area=c_area)
-                    except Exception as e:
-                        print('错误代码 [03] {}'.format(str(e)))
-                        Error_Log.objects.create(url=url, error='错误代码 [03] {}'.format(str(e)))
-
+                # 这里本来是要扫描c段开放端口，但是这样就相当于把耗时操作加载到同步执行的线程中
+                # 于是把扫描开放端口  放在获取ip详细信息线程中处理
             except Exception as e:
                 print('错误代码 [21] {}'.format(str(e)))
                 Error_Log.objects.create(url=url, error='错误代码 [21] {}'.format(str(e)))
@@ -245,8 +218,39 @@ def Change_IP_Info():
         IP_Obj.area = area
         IP_Obj.cs = cs
         IP_Obj.get = '是'
+        IP_Obj.save()
         try:
-            IP_Obj.save()
+            cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
+            cs_name = cs
+            # 整个 C 段的数据ip
+
+            if ip in cs_ips:
+                cs_ips.remove(ip)
+
+            Read_to_check_host = set()
+            for cs_ip in cs_ips:
+                indata = list(IP.objects.filter(ip=str(cs_ip)))
+                if indata == [] and cs_ip != ip:
+                    Read_to_check_host.add(cs_ip)
+
+            Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
+            print('[+ CHost Scaner] {} 段存活主机 : {}台'.format(cs_name, len(Alive_Hosts)))
+            if Alive_Hosts == []:
+                return
+            for alive_host in Alive_Hosts:
+                try:
+                    checkindata = list(IP.objects.filter(ip=str(alive_host)))
+                    if checkindata == []:
+                        # 最后一次数据判断校验
+                        c_ip = str(alive_host)
+                        c_cs = cs_name
+                        c_area = IP_Res.get_ip_address(c_ip)
+                        IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
+                                          area=c_area)
+                except Exception as e:
+                    print('错误代码 [03] {}'.format(str(e)))
+                    Error_Log.objects.create(url=ip, error='错误代码 [03] {}'.format(str(e)))
+
         except Exception as e:
             print('错误代码 [38] {}'.format(str(e)))
             Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [38] {}'.format(str(e)))
