@@ -24,3 +24,4 @@ pyecharts-snapshot==0.1.10
 httplib2==0.9.2
 future==0.17.1
 IPy==1.0
+pymysql==0.9.3

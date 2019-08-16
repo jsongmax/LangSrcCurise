@@ -10,19 +10,19 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 import os
-import pymysql         # Ò»¶¨ÒªÌí¼ÓÕâÁ½ÐÐ£¡Í¨¹ýpip install pymysql£¡
+import pymysql         # Ò»ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð£ï¿½Í¨ï¿½ï¿½pip install pymysqlï¿½ï¿½
 pymysql.install_as_MySQLdb()
 
 import pymysql
 import configparser
 import contextlib
 cfg = configparser.ConfigParser()
-cfg.read('Config.ini')
+cfg.read('config.ini')
 
 host = cfg.get("Server", "host")
 username = cfg.get("Server", "username")
 password = cfg.get("Server", "password")
-Dbname = cfg.get("Server","dbname")
+Dbname = cfg.get("Server","dbname").lower()
 port = int(cfg.get("Server","port"))
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
