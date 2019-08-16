@@ -46,7 +46,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 ## 配置数据库信息
 
-在主目录下的 Config.ini 文件中修改相关mysql登陆信息
+在主目录下的 config.ini 文件中修改相关mysql登陆信息
 
 	[Server]
 	host = 127.0.0.1 # mysql登陆的ip
