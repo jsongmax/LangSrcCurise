@@ -7,7 +7,7 @@ import configparser
 
 
 cfg = configparser.ConfigParser()
-cfg.read('Config.ini')
+cfg.read('config.ini')
 
 host = cfg.get("Server", "host")
 username = cfg.get("Server", "username")

@@ -1,22 +1,11 @@
-# 历史版本
-
-当前版本使用的数据库为mysql8.0，以后更新将长期使用MySQL8.0版本，如需使用本地数据库sqlite3，可以下载最后一个sqlite3版本
-
-[下载地址](https://github.com/LangziFun/LangSrcCurise/tree/41d2848b7c59ea0e97e94e38618abd61a7cbaea4)
-
 # 前言
 
 LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信息收集整理的自动化资产监控管理系统，基于Django开发。
 
 
-类似于WEB服务的系统，打包方案应该把把所有需要的库，调用资源，相关环境保存在本地，每次在迁移环境和配置使用都可以非常简便，并且WEB应用依赖的第三方库有时如果更新了可能会导致不匹配，因此该项目安装环境分两种:
-
-1. 第一种是将所有需要的库都打包在本地文件，无需再安装其他相关库，但是**这种方法只通用于windows**。
-2. 第二种方法是自行安装相关库，适配Windows/Linux。
-
 # 项目进度
 
-目前完成后端60%功能，前端已经完成40%功能，不过核心可以开始运作，剩下的会在后期慢慢更新。
+目前完成后端60%功能，前端已经完成45%功能，不过核心可以开始运作，剩下的会在后期慢慢更新。
 
 # 需要环境
 
@@ -25,27 +14,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 3. nmap==7.8
 4. django==2.1.1
 
-
-# 第一种安装方法
-
-最好是在一个全新的环境安装
-
-1. 安装软件  python3.6     注意必须为 3.6
-2. 执行命令  python3 -m pip install django==2.1.1,或者在本地 Need_Packages 解压django后执行命令python3 setup.py install
-3. Windows  安装Nmap 并添加到系统环境变量,windows安装nmap可能需要安装目录下 Need_Packages/WinPcap_4_1_3.exe 
-
-
-**注意：即下方执行开始扫描的时候，必须右键以管理员身份启动CMD，然后CMD移动路径到LangSrc资产监控目录下，然后再执行命令**
-
-
-
-
-
-# 第二种安装方法
-
-将当前目录下的 LangSrcCuriseOnLinux 文件夹单独保存到其他目录下
-
-随后执行一切命令代码皆在此 LangSrcCuriseOnLinux 目录下执行操作
+# 安装环境
 
 ## Linux 用户
 
@@ -54,7 +23,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. sudo apt-get install python3.6
 2. sudo apt-get install nmap
 3. sudo python3 -m pip install -r requirement.txt
-4. 安装mysql8.0，步骤较多，自行百度
+4. 安装MySQL8.0，步骤较多，自行百度
 
 **注意：在linux下执行任何生成数据库，启动任何服务命令前都需要加上 sudo**
 
@@ -66,9 +35,8 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. 安装python3.6
 2. 安装nmap并添加到环境变量
 3. python3 -m pip install -r requirement.txt
-4. 建议安装最新版phpstudy，自带mysql8.0
+4. 建议安装最新版phpstudy，自带MySQL8.0
 
-注意第二种安装方法可能会因为网络宽带等原因，安装相关库失败。
 
 # 开始使用
 
@@ -282,3 +250,11 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 在服务器不建议开启扫描任务，开个WEB服务即可，扫描结果数据库可以本地扫后迁移到服务器.
 
+# 历史版本
+
+当前版本使用的数据库为mysql8.0，以后更新将长期使用MySQL8.0版本，如需使用本地数据库sqlite3，可以下载
+
+[最后一个sqlite3版本 不在维护](https://github.com/LangziFun/LangSrcCurise/tree/41d2848b7c59ea0e97e94e38618abd61a7cbaea4)
+
+
+[最后一个免安装相关库版本 不在维护](https://github.com/LangziFun/LangSrcCurise/tree/00bc66c5e763b88136a5f3d187ffc1190e0ffeba)
