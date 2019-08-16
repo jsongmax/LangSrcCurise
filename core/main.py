@@ -56,8 +56,6 @@ def get_host(url):
 
 def Add_Data_To_Url(url):
     time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
     try:
         ip = get_host(url)
         if ip == '获取失败':
@@ -222,7 +220,7 @@ def Change_IP_Info():
         try:
             cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
             cs_name = cs
-            # 整个 C 段的数据ip
+            # 整个 C 段的数据ip,扫描c开放端口
 
             if ip in cs_ips:
                 cs_ips.remove(ip)
@@ -359,8 +357,8 @@ def Sub_Baidu(Sub_Domains):
         for sub_domain in Sub_Domains:
             res = Baidu(sub_domain)
             if res != []:
-                with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                    result = pool.map(Add_Data_To_Url, list(set(res)))
+                with ProcessPoolExecutor(max_workers=pool_count) as pool2:
+                    result = pool2.map(Add_Data_To_Url, list(set(res)))
             time.sleep(60)
             # 每次扫完一个域名等待一小会儿
         time.sleep(3600*12)
@@ -382,8 +380,8 @@ def Sub_Brute(Sub_Domains):
         res = Brute(domain).start()
         res = list(set(res))
         if res != []:
-            with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                result = pool.map(Add_Data_To_Url, res)
+            with ProcessPoolExecutor(max_workers=pool_count) as pool3:
+                result = pool3.map(Add_Data_To_Url, res)
         # 每爆破一个子域名，歇会儿
         time.sleep(360)
 
@@ -448,11 +446,11 @@ def Run_Crawl(Domains):
 
 
 def Sub_Crawl(pax,Sub_Domains):
-    p = ProcessPoolExecutor(max_workers=pool_count)
+    p1 = ProcessPoolExecutor(max_workers=pool_count)
     for i in pax:
-        p.submit(Run_Crawl,Sub_Domains)
-        p.submit(Change_IP_Info)
-        p.submit(Change_ShowData_Info,Sub_Domains)
+        p1.submit(Run_Crawl,Sub_Domains)
+        p1.submit(Change_IP_Info)
+        p1.submit(Change_ShowData_Info,Sub_Domains)
 
 if __name__ == '__main__':
     pass
