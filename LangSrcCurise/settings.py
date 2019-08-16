@@ -97,14 +97,27 @@ WSGI_APPLICATION = 'LangSrcCurise.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
+        #'ENGINE': 'PyMysqlPool.mysql.connector.django',
         'NAME': Dbname,
         'HOST': host,
         'USER': username,
         'PASSWORD': password,
         'PORT': str(port),
+
     }
 }
 
+# 'OPTIONS': {
+#     'autocommit': True,
+#     'pool': {
+#         # use = 0 no pool else use pool
+#         "use": 0,
+#         # size is >=0,  0 is dynamic pool
+#         "size": 10,
+#         # pool name
+#         "name": "local",
+#     }
+# }
 
 # DATABASES = {
 #     'default': {

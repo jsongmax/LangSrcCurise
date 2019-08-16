@@ -18,6 +18,8 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 ## Linux 用户
 
+**在linux无法完美兼容**
+
 依次执行以下命令：
 
 1. sudo apt-get install python3.6

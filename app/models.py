@@ -41,6 +41,7 @@ class Domains(models.Model):
         verbose_name_plural = verbose_name
 
 class Content(models.Model):
+    uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=50,unique=True,verbose_name='索引网址')
     content = models.TextField(verbose_name='网页内容')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -76,7 +77,7 @@ class Other_Url(models.Model):
 
 class Setting(models.Model):
     name = models.CharField(max_length=30,default='萌萌哒屎壳郎一号方案',verbose_name='配置方案')
-    Alive_Code = models.CharField(max_length=200,default='[200,301,302,401,402,500,503]',verbose_name='允许入库状态码')
+    Alive_Code = models.CharField(max_length=250,default='[200,204,206,301,302,304,401,402,403,404,500,501,502,503]',verbose_name='允许入库状态码')
     Thread = models.CharField(max_length=4,default='2', verbose_name='线程数量')
     Pool = models.CharField(max_length=4,default='3',  verbose_name='进程池量')
     processes = models.CharField(max_length=4,default='4',  verbose_name='进程数量')

@@ -20,15 +20,22 @@ sys.path.insert(0,os.path.abspath(os.path.join(pathname,'..')))
 os.environ.setdefault("DJANGO_SETTINGS_MODULE","LangSrcCurise.settings")
 django.setup()
 from app.models import Other_Url,IP,URL,Show_Data,Error_Log,Cpu_Min,Domains,Setting,Content
-
+from django.db import connections
 from concurrent.futures import ProcessPoolExecutor
+
+
+def close_old_connections():
+    for conn in connections.all():
+        conn.close_if_unusable_or_obsolete()
 
 
 Set = Setting.objects.all()[0]
 pool_count = int(Set.Pool)
 Alive_Status = eval(Set.Alive_Code)
 
+
 def Run_Cpu_Min():
+    close_old_connections()
     while 1:
         try:
             c = Cor()
@@ -38,8 +45,10 @@ def Run_Cpu_Min():
             print('错误代码 [16] {}'.format(str(e)))
             Error_Log.objects.create(url='监控资源消耗', error='错误代码 [16] {}'.format(str(e)))
             return '获取失败'
-
-
+#
+# def on_done(future):
+#     # 因为每一个线程都有一个 connections，所以这里可以调用 close_all()，把本线程名下的所有连接关闭。
+#     connections.close_all()
 
 def get_host(url):
     url = url.split('//')[1]
@@ -54,21 +63,25 @@ def get_host(url):
         return '获取失败'
 
 
+
 def Add_Data_To_Url(url):
     time.sleep(random.randint(1,20))
     time.sleep(random.randint(1,20))
     time.sleep(random.randint(1,20))
+    close_old_connections()
     try:
         ip = get_host(url)
         if ip == '获取失败':
             return
         # print('[+ Domain UrlIP] IP解析 --> {}  IP --> {}'.format(url, ip))
+        
         test_url = list(URL.objects.filter(url=url))
         # 如果数据库有这个网站的话，就直接退出
         if test_url != []:
             return
 
         try:
+            
             Test_Other_Url = Other_Url.objects.filter(url=url)
             # 判断网络资产表是否有这个数据，如果没有的话，就添加进去
             if list(Test_Other_Url) == []:
@@ -81,11 +94,14 @@ def Add_Data_To_Url(url):
                 res_ip = ip
                 #if int(res_status) in Alive_Status:
                     # 添加的标准是 在入库状态码内
+
+                
                 Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,
                                              status=res_status,ip=res_ip)
 
         except Exception as e:
             print('错误代码 [29] {}'.format(str(e)))
+            
             Error_Log.objects.create(url=url, error='错误代码 [29] {}'.format(str(e)))
 
         try:
@@ -99,10 +115,12 @@ def Add_Data_To_Url(url):
             '''
             这里添加网址资产到 索引表 和 清洗表
             '''
+            
             test_url1 = list(URL.objects.filter(url=url))
             # 如果数据库有这个网站的话，就直接退出
 
             if test_url1 == []:
+                
                 URL.objects.create(url=url,ip=ip)
                 # 添加 网址索引
                 try:
@@ -116,12 +134,14 @@ def Add_Data_To_Url(url):
                     IP_Res = Get_Ip_Info(ip)
                     Show_cs = IP_Res.get_cs_name(ip)
                     Cont.save()
+                    
                     Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                     # 添加网页内容，数据展示
                 except Exception as e:
                     print('错误代码 [08] {}'.format(str(e)))
+                    
                     Error_Log.objects.create(url='外键添加错误', error='错误代码 [08] {}'.format(str(e)))
-
+            
             BA = Domains.objects.all()
             ALL_DOMAINS = [x.get('url') for x in BA.values()]
             # 所有监控域名
@@ -132,7 +152,9 @@ def Add_Data_To_Url(url):
             try:
                 # 尝试进行域名总数据获取检测
                 if This_Sub != []:
+                    
                     Domain_Count = Domains.objects.filter(url=This_Sub[0])[0]
+                    
                     counts = Other_Url.objects.filter(url__contains=This_Sub[0])
                     Domain_Count.counts = str(len(counts))
                     # counts = int(Domain_Count.counts)+1
@@ -140,15 +162,18 @@ def Add_Data_To_Url(url):
                     Domain_Count.save()
             except Exception as e:
                 print('错误代码 [15] {}'.format(str(e)))
+                
                 Error_Log.objects.create(url=url+'|'+This_Sub, error='错误代码 [15] {}'.format(str(e)))
         except Exception as e:
             print('错误代码 [22] {}'.format(str(e)))
+            
             Error_Log.objects.create(url=url, error='错误代码 [22] {}'.format(str(e)))
-
+        
         test_ip = list(IP.objects.filter(ip=ip))
         # 开始添加ip 维护ip统一
         # 这里开始判断数据库中是否有这个ip，并且先添加然后修改(防止重复浪费资源)
         if test_ip != []:
+            
             test_ip_0 = IP.objects.filter(ip=ip)[0]
             # 这里判断数据中IP时候存在，如果存在并且有扫描状态，就直接中断操作
             if test_ip_0.get == '是' or test_ip_0.get == '中':
@@ -158,6 +183,7 @@ def Add_Data_To_Url(url):
                 IP_Res = Get_Ip_Info(ip)
                 area = IP_Res.get_ip_address(ip)
                 cs_name = IP_Res.get_cs_name(ip)
+                
                 IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
 
@@ -165,15 +191,19 @@ def Add_Data_To_Url(url):
                 # 于是把扫描开放端口  放在获取ip详细信息线程中处理
             except Exception as e:
                 print('错误代码 [21] {}'.format(str(e)))
+                
                 Error_Log.objects.create(url=url, error='错误代码 [21] {}'.format(str(e)))
     except Exception as e:
         print('错误代码 [30] {}'.format(str(e)))
+        
         Error_Log.objects.create(url=url, error='错误代码 [30] {}'.format(str(e)))
+
 
 
 
 def Change_IP_Info():
     while 1:
+        close_old_connections()
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
         try:
@@ -259,8 +289,10 @@ def Change_IP_Info():
             Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [38] {}'.format(str(e)))
 
 
+
 def Change_ShowData_Info(Sub_Domains):
     while 1:
+        close_old_connections()
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         # 线程同步
@@ -356,14 +388,16 @@ def Change_ShowData_Info(Sub_Domains):
 #     # 这里对传入Baidu进行重写，该函数接受一个参数域名，返回参数对应的网址，列表格式
 #
 
+
 def Sub_Baidu(Sub_Domains):
     while 1:
+        close_old_connections()
         res = []
         for sub_domain in Sub_Domains:
             res = Baidu(sub_domain)
             if res != []:
-                with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                    result = pool.map(Add_Data_To_Url, list(set(res)))
+                with ProcessPoolExecutor(max_workers=pool_count) as pool3:
+                    result = pool3.map(Add_Data_To_Url, list(set(res)))
             time.sleep(60)
             # 每次扫完一个域名等待一小会儿
         time.sleep(3600*12)
@@ -379,21 +413,24 @@ def Sub_Baidu(Sub_Domains):
         # time.sleep(3600*12)
 
 
+
 def Sub_Brute(Sub_Domains):
     for domain in Sub_Domains:
         res = []
         res = Brute(domain).start()
         res = list(set(res))
         if res != []:
-            with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                result = pool.map(Add_Data_To_Url, res)
+            with ProcessPoolExecutor(max_workers=pool_count) as pool4:
+                result = pool4.map(Add_Data_To_Url, res)
         # 每爆破一个子域名，歇会儿
         time.sleep(360)
+
 
 
 def Run_Crawl(Domains):
     Domains = ['.'+str(x) for x in Domains]
     while 1:
+        close_old_connections()
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         try:
@@ -421,8 +458,8 @@ def Run_Crawl(Domains):
                 try:
                     Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
                     if list(Sub_Domains1) != []:
-                        with ProcessPoolExecutor(max_workers=pool_count) as pool:
-                            result = pool.map(Add_Data_To_Url, list(Sub_Domains1))
+                        with ProcessPoolExecutor(max_workers=pool_count) as pool1:
+                            result = pool1.map(Add_Data_To_Url, list(Sub_Domains1))
                     Other_Domains = list(All_Urls-Sub_Domains1)
                 except Exception as e:
                     print('错误代码 [11] {}'.format(str(e)))
@@ -451,11 +488,11 @@ def Run_Crawl(Domains):
 
 
 def Sub_Crawl(pax,Sub_Domains):
-    p = ProcessPoolExecutor(max_workers=pool_count)
+    p2 = ProcessPoolExecutor(max_workers=pool_count)
     for i in pax:
-        p.submit(Run_Crawl,Sub_Domains)
-        p.submit(Change_IP_Info)
-        p.submit(Change_ShowData_Info,Sub_Domains)
+        p2.submit(Run_Crawl,Sub_Domains)
+        p2.submit(Change_IP_Info)
+        p2.submit(Change_ShowData_Info,Sub_Domains)
 
 if __name__ == '__main__':
     pass
