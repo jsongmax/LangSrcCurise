@@ -81,6 +81,7 @@ def start():
         print('\n[警告] 数据库配置文件加载失败 请在后台管理系统检查是否正确配置相关数据\n\n')
         time.sleep(60)
         time.sleep(60)
+        time.sleep(60)
 
     t2 = threading.Thread(target=Sub_Baidu,args=(Sub_Domains,))
     t3 = threading.Thread(target=Sub_Crawl,args=(pax,Sub_Domains))

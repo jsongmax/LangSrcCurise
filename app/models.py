@@ -32,7 +32,7 @@ class Domains(models.Model):
     BA_sex = models.CharField(max_length=50,default='企业', verbose_name='性质')
     BA_name = models.CharField(max_length=50, verbose_name='名称')
     BA_id = models.CharField(max_length=50, verbose_name='编号')
-    counts = models.CharField(max_length=7, default=0, verbose_name='捕获数量')
+    counts = models.CharField(max_length=8, default=0, verbose_name='捕获数量')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
 
     class Meta:
@@ -65,8 +65,8 @@ class Other_Url(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=100,unique=True,verbose_name='爬行网址')
     title = models.CharField(max_length=120, default='None',verbose_name='网站标题')
-    power = models.CharField(max_length=50, default='None',verbose_name='容器/语言')
-    server = models.CharField(max_length=50, default='None',verbose_name='服务器类型')
+    power = models.CharField(max_length=100, default='None',verbose_name='容器/语言')
+    server = models.CharField(max_length=100, default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
     ip = models.CharField(max_length=15,verbose_name='IP地址')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -92,8 +92,8 @@ class Show_Data(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=50,unique=True,verbose_name='展示网址')
     title = models.CharField(max_length=100,default='None',verbose_name='网站标题')
-    power = models.CharField(max_length=50,default='None',verbose_name='容器/语言')
-    server = models.CharField(max_length=50,default='None',verbose_name='服务器类型')
+    power = models.CharField(max_length=150,default='None',verbose_name='容器/语言')
+    server = models.CharField(max_length=150,default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
     content = models.ForeignKey('Content',on_delete=models.DO_NOTHING,verbose_name='网页内容')
 
