@@ -87,7 +87,10 @@ def Add_Data_To_Url(url):
             if list(Test_Other_Url) == []:
                 res = Get_Url_Info(url).get_info()
                 res_url = res.get('url')
-                res_title = res.get('title')
+                try:
+                    res_title = pymysql.escape_string(res.get('title'))
+                except:
+                    res_title = 'Error'
                 res_power = res.get('power')
                 res_server = res.get('server')
                 res_status = res.get('status')
@@ -472,7 +475,10 @@ def Run_Crawl(Domains):
                                 ip = get_host(urle)
                                 res = Get_Url_Info(urle).get_info()
                                 res_url = res.get('url')
-                                res_title = res.get('title')
+                                try:
+                                    res_title = pymysql.escape_string(res.get('title'))
+                                except:
+                                    res_title = 'Error'
                                 res_power = res.get('power')
                                 res_server = res.get('server')
                                 status = res.get('status')

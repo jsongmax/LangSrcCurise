@@ -35,6 +35,7 @@ with co_mysql(db='mysql') as cursor:
        pass
    else:
        cursor.execute('create database {}'.format(Dbname))
+       cursor.execute('set global max_allowed_packet=33554432‬')
        cursor.execute("SET @@global.sql_mode= '';")
        cursor.execute('ALTER DATABASE {} DEFAULT CHARACTER SET utf8mb4'.format(Dbname))
 
