@@ -55,9 +55,6 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 	
 	[mysqld]
 	port=3306
-	default_authentication_plugin=mysql_native_password
-	basedir=E:/phpstudy_pro/Extensions/MySQL8.0.12/
-	datadir=E:/phpstudy_pro/Extensions/MySQL8.0.12/data/
 	character-set-server=utf8
 	default-storage-engine=InnoDB
 	max_connections=128

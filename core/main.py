@@ -475,7 +475,7 @@ def Run_Crawl(Domains):
                 except Exception as e:
                     print('错误代码 [11] {}'.format(str(e)))
                     Error_Log.objects.create(url=url, error='错误代码 [11] {}'.format(str(e)))
-                if Other_Domains != []:
+                if Other_Domains != [] and Other_Domains != None:
                     for urle in Other_Domains:
                         try:
                             Test_Other_Url = list(Other_Url.objects.filter(url=urle))
