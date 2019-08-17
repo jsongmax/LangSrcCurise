@@ -47,6 +47,25 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 1. 第一步先开启mysql服务，并且允许用户连接
 2. 设置MySQL最大连接数为128，最大插入缓存数据量为200M
 
+
+推荐mysql.ini设置如下：
+
+	[mysql]
+	default-character-set=utf8
+	
+	[mysqld]
+	port=3306
+	default_authentication_plugin=mysql_native_password
+	basedir=E:/phpstudy_pro/Extensions/MySQL8.0.12/
+	datadir=E:/phpstudy_pro/Extensions/MySQL8.0.12/data/
+	character-set-server=utf8
+	default-storage-engine=InnoDB
+	max_connections=128
+	max_allowed_packet = 500M
+	log-error="E:/phpstudy_pro/Extensions/MySQL8.0.12/error.log"  
+	# 这里的日志输出自己修改路径
+
+
 ## 配置数据库信息
 
 在主目录下的 config.ini 文件中修改相关mysql登陆信息

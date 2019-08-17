@@ -95,16 +95,15 @@ def Add_Data_To_Url(url):
                 res_server = res.get('server')
                 res_status = res.get('status')
                 res_ip = ip
-                #if int(res_status) in Alive_Status:
-                    # 添加的标准是 在入库状态码内
-
-                
-                Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,
-                                             status=res_status,ip=res_ip)
+                try:
+                    Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=res_status,ip=res_ip)
+                except Exception as e:
+                    print('错误代码 [17] {}'.format(str(e)))
+                    Error_Log.objects.create(url=url+'|加载数据错误', error='错误代码 [17] {}'.format(str(e)))
+                    Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=res_status,ip=res_ip)
 
         except Exception as e:
             print('错误代码 [29] {}'.format(str(e)))
-            
             Error_Log.objects.create(url=url, error='错误代码 [29] {}'.format(str(e)))
 
         try:
@@ -123,28 +122,32 @@ def Add_Data_To_Url(url):
             # 如果数据库有这个网站的话，就直接退出
 
             if test_url1 == []:
-                
                 URL.objects.create(url=url,ip=ip)
                 # 添加 网址索引
                 try:
                     try:
                         Show_contents = pymysql.escape_string(Get_Url_Info(url).Requests()[0])
-                    except:
+                        Cont = Content()
+                        Cont.url = url
+                        Cont.content = Show_contents
+                        IP_Res = Get_Ip_Info(ip)
+                        Show_cs = IP_Res.get_cs_name(ip)
+                        Cont.save()
+                    except Exception as e:
+                        print('错误代码 [04] {}'.format(str(e)))
+                        Error_Log.objects.create(url=url+'|外键添加错误', error='错误代码 [04] {}'.format(str(e)))
                         Show_contents = 'Error'
-                    Cont = Content()
-                    Cont.url = url
-                    Cont.content = Show_contents
-                    IP_Res = Get_Ip_Info(ip)
-                    Show_cs = IP_Res.get_cs_name(ip)
-                    Cont.save()
-                    
+                        Cont = Content()
+                        Cont.url = url
+                        Cont.content = Show_contents
+                        IP_Res = Get_Ip_Info(ip)
+                        Show_cs = IP_Res.get_cs_name(ip)
+                        Cont.save()
                     Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                     # 添加网页内容，数据展示
                 except Exception as e:
                     print('错误代码 [08] {}'.format(str(e)))
-                    
                     Error_Log.objects.create(url='外键添加错误', error='错误代码 [08] {}'.format(str(e)))
-            
             BA = Domains.objects.all()
             ALL_DOMAINS = [x.get('url') for x in BA.values()]
             # 所有监控域名
@@ -208,7 +211,6 @@ def Change_IP_Info():
     while 1:
         close_old_connections()
         time.sleep(random.randint(1,20))
-        time.sleep(random.randint(1,20))
         try:
             target_ip = IP.objects.filter(get='否')[0]
             ip = target_ip.ip
@@ -228,75 +230,81 @@ def Change_IP_Info():
                 print('错误代码 [39] {}'.format(str(e)))
                 Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [39] {}'.format(str(e)))
                 return
-
-        print('[+ Host Scaner] 当前扫描主机 : {}'.format(ip))
-        IP_Res = Get_Ip_Info(ip)
-        servers = IP_Res.get_server_from_nmap(ip)
-        # 服务与端口  字典类型
-        open_port = servers.keys()
-        check_alive_url = []
-        for port in open_port:
-            check_alive_url.append('http://{}:{}'.format(ip, port))
-            check_alive_url.append('https://{}:{}'.format(ip, port))
-        alive_url = Get_Alive_Url(check_alive_url)
-        # 该IP上存活WEB，类型为列表，内容为多个字典
-        host_type = IP_Res.get_host_type(ip)
-        # windows/linux
-        area = IP_Res.get_ip_address(ip)
-        # 返回地址
-        cs = IP_Res.get_cs_name(ip)
-
-        IP_Obj = IP.objects.filter(ip=ip)[0]
-        IP_Obj.ip = ip
-        IP_Obj.servers = str(servers)
-        IP_Obj.host_type = host_type
-        IP_Obj.alive_urls = str(alive_url)
-        IP_Obj.area = area
-        IP_Obj.cs = cs
-        IP_Obj.get = '是'
-        IP_Obj.save()
         try:
-            cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
-            cs_name = cs
-            # 整个 C 段的数据ip
+            print('[+ Host Scaner] 当前扫描主机 : {}'.format(ip))
+            IP_Res = Get_Ip_Info(ip)
+            servers = IP_Res.get_server_from_nmap(ip)
+            # 服务与端口  字典类型
+            open_port = servers.keys()
+            check_alive_url = []
+            for port in open_port:
+                check_alive_url.append('http://{}:{}'.format(ip, port))
+                check_alive_url.append('https://{}:{}'.format(ip, port))
+            alive_url = Get_Alive_Url(check_alive_url)
+            # 该IP上存活WEB，类型为列表，内容为多个字典
+            host_type = IP_Res.get_host_type(ip)
+            # windows/linux
+            area = IP_Res.get_ip_address(ip)
+            # 返回地址
+            cs = IP_Res.get_cs_name(ip)
 
-            if ip in cs_ips:
-                cs_ips.remove(ip)
-
-            Read_to_check_host = set()
-            for cs_ip in cs_ips:
-                indata = list(IP.objects.filter(ip=str(cs_ip)))
-                if indata == [] and cs_ip != ip:
-                    Read_to_check_host.add(cs_ip)
-
-            Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
-            print('[+ CHost Scaner] {} 段存活主机 : {}台'.format(cs_name, len(Alive_Hosts)))
-            if Alive_Hosts == []:
-                return
-            for alive_host in Alive_Hosts:
-                try:
-                    checkindata = list(IP.objects.filter(ip=str(alive_host)))
-                    if checkindata == []:
-                        # 最后一次数据判断校验
-                        c_ip = str(alive_host)
-                        c_cs = cs_name
-                        c_area = IP_Res.get_ip_address(c_ip)
-                        IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
-                                          area=c_area)
-                except Exception as e:
-                    print('错误代码 [03] {}'.format(str(e)))
-                    Error_Log.objects.create(url=ip, error='错误代码 [03] {}'.format(str(e)))
-
+            IP_Obj = IP.objects.filter(ip=ip)[0]
+            IP_Obj.ip = ip
+            IP_Obj.servers = str(servers)
+            IP_Obj.host_type = host_type
+            IP_Obj.alive_urls = str(alive_url)
+            IP_Obj.area = area
+            IP_Obj.cs = cs
+            IP_Obj.get = '是'
+            IP_Obj.save()
         except Exception as e:
-            print('错误代码 [38] {}'.format(str(e)))
-            Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [38] {}'.format(str(e)))
+            print('错误代码 [53] {}'.format(str(e)))
+            Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [53] {}'.format(str(e)))
+
+        '''
+        下面的代码，是获取ip的c段存活主机，然后加载到扫描计划中，老夫先注释了
+        '''
+        # try:
+        #     cs_ips = [str(x) for x in list(IP_Res.get_cs_ips(ip).values())[0]]
+        #     cs_name = cs
+        #     # 整个 C 段的数据ip
+        #
+        #     if ip in cs_ips:
+        #         cs_ips.remove(ip)
+        #
+        #     Read_to_check_host = set()
+        #     for cs_ip in cs_ips:
+        #         indata = list(IP.objects.filter(ip=str(cs_ip)))
+        #         if indata == [] and cs_ip != ip:
+        #             Read_to_check_host.add(cs_ip)
+        #
+        #     Alive_Hosts = IP_Res.get_alive_hosts(Read_to_check_host)
+        #     print('[+ CHost Scaner] {} 段存活主机 : {}台'.format(cs_name, len(Alive_Hosts)))
+        #     if Alive_Hosts == []:
+        #         return
+        #     for alive_host in Alive_Hosts:
+        #         try:
+        #             checkindata = list(IP.objects.filter(ip=str(alive_host)))
+        #             if checkindata == []:
+        #                 # 最后一次数据判断校验
+        #                 c_ip = str(alive_host)
+        #                 c_cs = cs_name
+        #                 c_area = IP_Res.get_ip_address(c_ip)
+        #                 IP.objects.create(ip=c_ip, servers='None', host_type='None', cs=c_cs, alive_urls='None',
+        #                                   area=c_area)
+        #         except Exception as e:
+        #             print('错误代码 [03] {}'.format(str(e)))
+        #             Error_Log.objects.create(url=ip, error='错误代码 [03] {}'.format(str(e)))
+        #
+        # except Exception as e:
+        #     print('错误代码 [38] {}'.format(str(e)))
+        #     Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [38] {}'.format(str(e)))
 
 
 
 def Change_ShowData_Info(Sub_Domains):
     while 1:
         close_old_connections()
-        time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         # 线程同步
         try:
@@ -483,8 +491,14 @@ def Run_Crawl(Domains):
                                 res_server = res.get('server')
                                 status = res.get('status')
                                 res_ip = ip
-                                if int(status) in Alive_Status:
+                                #if int(status) in Alive_Status:
+                                try:
                                     Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
+                                except Exception as e:
+                                    print('错误代码 [33] {}'.format(str(e)))
+                                    Error_Log.objects.create(url=url+'|资产爬行错误', error='错误代码 [33] {}'.format(str(e)))
+                                    Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
+
                         except Exception as e:
                             print('错误代码 [33] {}'.format(str(e)))
                             Error_Log.objects.create(url=url, error='错误代码 [33] {}'.format(str(e)))
