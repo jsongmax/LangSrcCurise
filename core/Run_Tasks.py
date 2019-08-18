@@ -105,6 +105,8 @@ def start():
     p3.start()
     p4.start()
     p5.start()
+    # 下面这两行注释，就不会扫描端口运行服务于部署web站点，这样做获取子域名更快，但是相关IP站点的资产更少
+    # 酌情开启
     p6.start()
     p7.start()
 

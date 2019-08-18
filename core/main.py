@@ -249,7 +249,10 @@ def Change_IP_Info():
             IP_Obj.save()
         except Exception as e:
             Except_Log(stat=53, url='|清洗 IP 资产失败|', error=str(e))
-
+            # 这里如果失败，则回退
+            IP_Obj = IP.objects.filter(ip=ip)[0]
+            IP_Obj.get = '否'
+            IP_Obj.save()
         '''
         下面的代码，是获取ip的c段存活主机，然后加载到扫描计划中，老夫先注释了
         '''
@@ -380,7 +383,9 @@ def Change_ShowData_Info(Sub_Domains):
             ShowS_DataD.save()
         except Exception as e:
             Except_Log(stat=43, url=url + '|'+ip+'|清洗数据流程获取数据失败|', error=str(e))
-
+            ShowS_DataD = Show_Data.objects.filter(url=url)[0]
+            ShowS_DataD.success = '否'
+            ShowS_DataD.save()
 # def Run_Baidu(url):
 #     # 这里对传入Baidu进行重写，该函数接受一个参数域名，返回参数对应的网址，列表格式
 #
@@ -406,10 +411,10 @@ def Run_Crawl(Domains):
             time.sleep(600)
             # 在获取失败（数据库没数据存入），重试一次
             try:
-                target_url = URL.objects.filter(get='否')[0]
-                url = target_url.url
-                target_url.get = '是'
-                target_url.save()
+                target_url0 = URL.objects.filter(get='否')[0]
+                url = target_url0.url
+                target_url0.get = '是'
+                target_url0.save()
             except Exception as e:
                 Except_Log(stat=31, url='|获取URL失败|', error=str(e))
                 return
