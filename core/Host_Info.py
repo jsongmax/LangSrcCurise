@@ -12,6 +12,7 @@ socket.setdefaulttimeout(25)
 from urllib.parse import urlparse
 import requests
 requests.packages.urllib3.disable_warnings()
+import time
 from concurrent.futures import ProcessPoolExecutor,ThreadPoolExecutor
 from qqwry import QQwry
 from scapy.all import *
@@ -218,18 +219,27 @@ class Get_Ip_Info:
                 if r:
                     for k, v in r.items():
                         result[k]=v.get('name')
-                    # print('first data')
-                    # print(result)
-                    # print('secend data')
                     for k,v in result.items():
                         if v == None or v=='unknown' or v == '':
                             result[k] = self.get_server_from_banner(ip,int(k))
-            except Exception as e:
-                print('错误代码 [17] {} 扫描当前IP失败'.format(str(e)))
-                Error_Log.objects.create(url=ip + '|扫描当前IP失败', error='错误代码 [17] {} '.format(str(e)))
+            except:
+                time.sleep(10)
+                # 重试一次
+                res = nm.scan(ip, arguments='-Pn -sS -p 1-65535')
+                r = res['scan'][ip]['tcp']
+                try:
+                    if r:
+                        for k, v in r.items():
+                            result[k]=v.get('name')
+                        for k,v in result.items():
+                            if v == None or v=='unknown' or v == '':
+                                result[k] = self.get_server_from_banner(ip,int(k))
+                except Exception as e:
+                    print('错误代码 [13] {} 扫描当前IP失败'.format(str(e)))
+                    Error_Log.objects.create(url=ip + '|扫描当前IP失败', error='错误代码 [13] {} '.format(str(e)))
         except Exception as e :
-            print('错误代码 [16] {} 扫描当前IP失败'.format(str(e)))
-            Error_Log.objects.create(url=ip + '|扫描当前IP失败', error='错误代码 [16] {} '.format(str(e)))
+            print('错误代码 [14] {} 扫描当前IP失败'.format(str(e)))
+            Error_Log.objects.create(url=ip + '|扫描当前IP失败', error='错误代码 [14] {} '.format(str(e)))
         return result
 
     def get_ip_address(self,ip):

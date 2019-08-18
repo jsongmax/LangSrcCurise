@@ -180,11 +180,15 @@ def Add_Data_To_Url(url):
                 IP_Res = Get_Ip_Info(ip)
                 area = IP_Res.get_ip_address(ip)
                 cs_name = IP_Res.get_cs_name(ip)
-                IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
-                # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
+                try:
+                    IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
+                    # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
+                    # 这里本来是要扫描c段开放端口，但是这样就相当于把耗时操作加载到同步执行的线程中
+                    # 于是把扫描开放端口  放在获取ip详细信息线程中处理
+                except:
+                    Except_Log(stat=86, url=url + '|转换IP地区编码失败|', error=str(e))
+                    IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area='获取失败')
 
-                # 这里本来是要扫描c段开放端口，但是这样就相当于把耗时操作加载到同步执行的线程中
-                # 于是把扫描开放端口  放在获取ip详细信息线程中处理
             except Exception as e:
                 Except_Log(stat=21, url=url + '|添加IP资源失败|', error=str(e))
 
@@ -412,7 +416,7 @@ def Run_Crawl(Domains):
         try:
             All_Urls = set(Crawl(url))
             Other_Domains = []
-            if list(All_Urls) != []:
+            if list(All_Urls) != [] and All_Urls != None:
                 try:
                     Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
                     if list(Sub_Domains1) != []:
