@@ -134,6 +134,7 @@ def Add_Data_To_Url(url):
                         IP_Res = Get_Ip_Info(ip)
                         Show_cs = IP_Res.get_cs_name(ip)
                         Cont.save()
+                        Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                     except Exception as e:
                         Except_Log(stat=4, url=url + '|外键添加错误', error=str(e))
                         Show_contents = 'Error'
