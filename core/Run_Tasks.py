@@ -1,9 +1,11 @@
 # coding:utf-8
-from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min
+from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf
 import pymysql
 import contextlib
 import configparser
 
+from concurrent.futures import ProcessPoolExecutor
+from multiprocessing import Process
 cfg = configparser.ConfigParser()
 cfg.read('config.ini')
 
@@ -17,17 +19,17 @@ port = int(cfg.get("Server","port"))
 @contextlib.contextmanager
 def co_mysql(db='mysql'):
     conn = pymysql.connect(host=host,user=username,password=password,port=port,db=db,charset='utf8')
+    conn.ping(reconnect=True)
     cursor = conn.cursor()
     try:
         yield cursor
-    except:
+    except Exception as e:
+        print(e)
         print('\n[警告] 数据库连接失败 请检查mysql数据库是否正确安装并开启\n\n')
     finally:
         conn.commit()
         cursor.close()
         conn.close()
-
-
 
 import threading
 import django
@@ -83,17 +85,28 @@ def start():
         time.sleep(60)
         time.sleep(60)
 
-    t2 = threading.Thread(target=Sub_Baidu,args=(Sub_Domains,))
-    t3 = threading.Thread(target=Sub_Crawl,args=(pax,Sub_Domains))
-    t4 = threading.Thread(target=Run_Cpu_Min)
+    # t2 = threading.Thread(target=Sub_Baidu,args=(Sub_Domains,))
+    # t3 = threading.Thread(target=Sub_Crawl,args=(Sub_Domains,))
+    # t4 = threading.Thread(target=Run_Cpu_Min)
+    # t2.start()
+    # t3.start()
+    # t4.start()
+    # while 1:
+    #     Sub_Brute(Sub_Domains)
+    #     time.sleep(3600*24)
 
-    t2.start()
-    t3.start()
-    t4.start()
-
-    while 1:
-        Sub_Brute(Sub_Domains)
-        time.sleep(3600*24)
+    p2 = Process(target=Sub_Baidu,args=(Sub_Domains,))
+    p3 = Process(target=Sub_Crawl,args=(pax,Sub_Domains,))
+    p4 = Process(target=Run_Cpu_Min)
+    p6 = Process(target=Sub_ChangeIp,args=(pax,))
+    p7 = Process(target=Sub_ChangeInf,args=(Sub_Domains,))
+    p5 = Process(target=Sub_Brute,args=(Sub_Domains,))
+    p2.start()
+    p3.start()
+    p4.start()
+    p5.start()
+    p6.start()
+    p7.start()
 
 
 if __name__ == '__main__':

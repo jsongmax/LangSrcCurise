@@ -21,7 +21,14 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE","LangSrcCurise.settings")
 django.setup()
 from app.models import Other_Url,IP,URL,Show_Data,Error_Log,Cpu_Min,Domains,Setting,Content
 from django.db import connections
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
+from multiprocessing import Pool
+import threading
+
+def Except_Log(stat,url,error):
+    # close_old_connections()
+    print('错误代码 [{}] {}'.format(stat,str(error)))
+    Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
 
 
 def close_old_connections():
@@ -35,15 +42,17 @@ Alive_Status = eval(Set.Alive_Code)
 
 
 def Run_Cpu_Min():
-    close_old_connections()
+    # close_old_connections()
     while 1:
         try:
             c = Cor()
             cpu, men, new_send, new_recv = c[0], c[1], c[2], c[3]
             Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
+
         except Exception as e:
-            print('错误代码 [16] {}'.format(str(e)))
-            Error_Log.objects.create(url='监控资源消耗', error='错误代码 [16] {}'.format(str(e)))
+            Except_Log(stat=16,url='资源监控消耗',error=str(e))
+            #print('错误代码 [16] {}'.format(str(e)))
+            #Error_Log.objects.create(url='监控资源消耗', error='错误代码 [16] {}'.format(str(e)))
             return '获取失败'
 #
 # def on_done(future):
@@ -58,30 +67,26 @@ def get_host(url):
         s = socket.gethostbyname(url)
         return s
     except Exception as e:
-        print('错误代码 [25] {}'.format(str(e)))
-        Error_Log.objects.create(url=url,error='错误代码 [25] {}'.format(str(e)))
+        Except_Log(stat=24, url=url+'|获取IP失败', error=str(e))
         return '获取失败'
 
 
 
 def Add_Data_To_Url(url):
     time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    time.sleep(random.randint(1,20))
-    close_old_connections()
+    # close_old_connections()
     try:
         ip = get_host(url)
         if ip == '获取失败':
             return
         # print('[+ Domain UrlIP] IP解析 --> {}  IP --> {}'.format(url, ip))
-        
         test_url = list(URL.objects.filter(url=url))
+
         # 如果数据库有这个网站的话，就直接退出
         if test_url != []:
             return
 
         try:
-            
             Test_Other_Url = Other_Url.objects.filter(url=url)
             # 判断网络资产表是否有这个数据，如果没有的话，就添加进去
             if list(Test_Other_Url) == []:
@@ -89,8 +94,9 @@ def Add_Data_To_Url(url):
                 res_url = res.get('url')
                 try:
                     res_title = pymysql.escape_string(res.get('title'))
-                except:
+                except Exception as e:
                     res_title = 'Error'
+                    Except_Log(stat=11, url=url + '|网页内容转码失败', error=str(e))
                 res_power = res.get('power')
                 res_server = res.get('server')
                 res_status = res.get('status')
@@ -98,14 +104,10 @@ def Add_Data_To_Url(url):
                 try:
                     Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=res_status,ip=res_ip)
                 except Exception as e:
-                    print('错误代码 [17] {}'.format(str(e)))
-                    Error_Log.objects.create(url=url+'|加载数据错误', error='错误代码 [17] {}'.format(str(e)))
-                    Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=res_status,ip=res_ip)
-
+                    Except_Log(stat=17, url=url + '|标题等信息编码不符合', error=str(e))
+                    Other_Url.objects.create(url=res_url, title='Error', power='Error', server=res_server,status=res_status,ip=res_ip)
         except Exception as e:
-            print('错误代码 [29] {}'.format(str(e)))
-            Error_Log.objects.create(url=url, error='错误代码 [29] {}'.format(str(e)))
-
+            Except_Log(stat=29, url=url + '|网络资产表错误', error=str(e))
         try:
             # res = Get_Url_Info(url).get_info()
             # res_status = res.get('status')
@@ -117,7 +119,6 @@ def Add_Data_To_Url(url):
             '''
             这里添加网址资产到 索引表 和 清洗表
             '''
-            
             test_url1 = list(URL.objects.filter(url=url))
             # 如果数据库有这个网站的话，就直接退出
 
@@ -134,8 +135,7 @@ def Add_Data_To_Url(url):
                         Show_cs = IP_Res.get_cs_name(ip)
                         Cont.save()
                     except Exception as e:
-                        print('错误代码 [04] {}'.format(str(e)))
-                        Error_Log.objects.create(url=url+'|外键添加错误', error='错误代码 [04] {}'.format(str(e)))
+                        Except_Log(stat=4, url=url + '|外键添加错误', error=str(e))
                         Show_contents = 'Error'
                         Cont = Content()
                         Cont.url = url
@@ -143,43 +143,33 @@ def Add_Data_To_Url(url):
                         IP_Res = Get_Ip_Info(ip)
                         Show_cs = IP_Res.get_cs_name(ip)
                         Cont.save()
-                    Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
+                        Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                     # 添加网页内容，数据展示
                 except Exception as e:
-                    print('错误代码 [08] {}'.format(str(e)))
-                    Error_Log.objects.create(url='外键添加错误', error='错误代码 [08] {}'.format(str(e)))
-            BA = Domains.objects.all()
-            ALL_DOMAINS = [x.get('url') for x in BA.values()]
-            # 所有监控域名
-            # print('所有域名：{}'.format(ALL_DOMAINS))
-            This_Sub = [x for x in ALL_DOMAINS if x in url]
-            # 获取到当前子域名属于的主域名
-
+                    Except_Log(stat=8, url=url + '|外键添加错误', error=str(e))
+                BA = Domains.objects.all()
+                ALL_DOMAINS = [x.get('url') for x in BA.values()]
+                # 所有监控域名
+                # print('所有域名：{}'.format(ALL_DOMAINS))
+                This_Sub = [x for x in ALL_DOMAINS if x in url]
+                # 获取到当前子域名属于的主域名
             try:
                 # 尝试进行域名总数据获取检测
                 if This_Sub != []:
-                    
-                    Domain_Count = Domains.objects.filter(url=This_Sub[0])[0]
-                    
-                    counts = Other_Url.objects.filter(url__contains=This_Sub[0])
-                    Domain_Count.counts = str(len(counts))
-                    # counts = int(Domain_Count.counts)+1
-                    # Domain_Count.counts = counts
-                    Domain_Count.save()
+                        Domain_Count = Domains.objects.filter(url=This_Sub[0])[0]
+                        counts = Other_Url.objects.filter(url__contains=This_Sub[0])
+                        Domain_Count.counts = str(len(counts))
+                        # counts = int(Domain_Count.counts)+1
+                        # Domain_Count.counts = counts
+                        Domain_Count.save()
             except Exception as e:
-                print('错误代码 [15] {}'.format(str(e)))
-                
-                Error_Log.objects.create(url=url+'|'+This_Sub, error='错误代码 [15] {}'.format(str(e)))
+                Except_Log(stat=15, url=url +'|获取归属域名失败|'+This_Sub, error=str(e))
         except Exception as e:
-            print('错误代码 [22] {}'.format(str(e)))
-            
-            Error_Log.objects.create(url=url, error='错误代码 [22] {}'.format(str(e)))
-        
+            Except_Log(stat=22, url=url + '|添加到网址索引表失败|', error=str(e))
         test_ip = list(IP.objects.filter(ip=ip))
         # 开始添加ip 维护ip统一
         # 这里开始判断数据库中是否有这个ip，并且先添加然后修改(防止重复浪费资源)
         if test_ip != []:
-            
             test_ip_0 = IP.objects.filter(ip=ip)[0]
             # 这里判断数据中IP时候存在，如果存在并且有扫描状态，就直接中断操作
             if test_ip_0.get == '是' or test_ip_0.get == '中':
@@ -189,27 +179,23 @@ def Add_Data_To_Url(url):
                 IP_Res = Get_Ip_Info(ip)
                 area = IP_Res.get_ip_address(ip)
                 cs_name = IP_Res.get_cs_name(ip)
-                
                 IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area=area)
                 # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
 
                 # 这里本来是要扫描c段开放端口，但是这样就相当于把耗时操作加载到同步执行的线程中
                 # 于是把扫描开放端口  放在获取ip详细信息线程中处理
             except Exception as e:
-                print('错误代码 [21] {}'.format(str(e)))
-                
-                Error_Log.objects.create(url=url, error='错误代码 [21] {}'.format(str(e)))
+                Except_Log(stat=21, url=url + '|添加IP资源失败|', error=str(e))
+
     except Exception as e:
-        print('错误代码 [30] {}'.format(str(e)))
-        
-        Error_Log.objects.create(url=url, error='错误代码 [30] {}'.format(str(e)))
+        Except_Log(stat=30, url=url + '|维护传入网址失败|', error=str(e))
 
 
 
 
 def Change_IP_Info():
     while 1:
-        close_old_connections()
+        # close_old_connections()
         time.sleep(random.randint(1,20))
         try:
             target_ip = IP.objects.filter(get='否')[0]
@@ -227,8 +213,7 @@ def Change_IP_Info():
                 target_ip.get = '中'
                 target_ip.save()
             except Exception as e:
-                print('错误代码 [39] {}'.format(str(e)))
-                Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [39] {}'.format(str(e)))
+                Except_Log(stat=39, url='|获取数据库 IP 资产失败|', error=str(e))
                 return
         try:
             print('[+ Host Scaner] 当前扫描主机 : {}'.format(ip))
@@ -258,8 +243,7 @@ def Change_IP_Info():
             IP_Obj.get = '是'
             IP_Obj.save()
         except Exception as e:
-            print('错误代码 [53] {}'.format(str(e)))
-            Error_Log.objects.create(url='获取 IP 失败', error='错误代码 [53] {}'.format(str(e)))
+            Except_Log(stat=53, url='|清洗 IP 资产失败|', error=str(e))
 
         '''
         下面的代码，是获取ip的c段存活主机，然后加载到扫描计划中，老夫先注释了
@@ -304,7 +288,7 @@ def Change_IP_Info():
 
 def Change_ShowData_Info(Sub_Domains):
     while 1:
-        close_old_connections()
+        # close_old_connections()
         time.sleep(random.randint(1, 20))
         # 线程同步
         try:
@@ -337,8 +321,7 @@ def Change_ShowData_Info(Sub_Domains):
                     # 这里就不要设置检查状态了，等到最后再设置
                     target_info.save()
             except Exception as e:
-                print('错误代码 [41] {}'.format(str(e)))
-                Error_Log.objects.create(url='清洗数据流程获取数据失败', error='错误代码 [41] {}'.format(str(e)))
+                Except_Log(stat=41, url=url + '|清洗数据流程获取数据失败|', error=str(e))
                 return
         print('[+ DataInfo Collection] 数据整理清洗 : {} --> {}'.format(url,ip))
         try:
@@ -356,8 +339,7 @@ def Change_ShowData_Info(Sub_Domains):
                 Show_server = 'None'
                 # 该网站使用的web容器
                 Show_status = '404'
-                print('错误代码 [12] {}'.format(str(e)))
-                Error_Log.objects.create(url='清洗数据流程获取数据失败', error='错误代码 [12] {}'.format(str(e)))
+                Except_Log(stat=12, url=url + '|清洗数据流程获取数据失败|', error=str(e))
 
             Show_servers = Data_IP.servers
             # 开放的端口和服务，字典类型
@@ -392,56 +374,21 @@ def Change_ShowData_Info(Sub_Domains):
             ShowS_DataD.success = Show_success
             ShowS_DataD.save()
         except Exception as e:
-            print('错误代码 [43] {}'.format(str(e)))
-            Error_Log.objects.create(url='清洗数据URL:{} IP:{}失败'.format(url,ip), error='错误代码 [43] {}'.format(str(e)))
+            Except_Log(stat=43, url=url + '|'+ip+'|清洗数据流程获取数据失败|', error=str(e))
 
 # def Run_Baidu(url):
 #     # 这里对传入Baidu进行重写，该函数接受一个参数域名，返回参数对应的网址，列表格式
 #
 
 
-def Sub_Baidu(Sub_Domains):
-    while 1:
-        close_old_connections()
-        res = []
-        for sub_domain in Sub_Domains:
-            res = Baidu(sub_domain)
-            if res != []:
-                with ProcessPoolExecutor(max_workers=pool_count) as pool3:
-                    result = pool3.map(Add_Data_To_Url, list(set(res)))
-            time.sleep(60)
-            # 每次扫完一个域名等待一小会儿
-        time.sleep(3600*12)
-        # 每12小时监控一次
-
-        # with ProcessPoolExecutor(max_workers=pool_count) as pool:
-        #     res = list(pool.map(Baidu,Sub_Domains))
-        # if res != []:
-        #     res = list(set([y for x in res for y in x]))
-        #     with ProcessPoolExecutor(max_workers=pool_count) as pool:
-        #         result = pool.map(Add_Data_To_Url, res)
-        # # 每次跑完休息一阵子
-        # time.sleep(3600*12)
-
-
-
-def Sub_Brute(Sub_Domains):
-    for domain in Sub_Domains:
-        res = []
-        res = Brute(domain).start()
-        res = list(set(res))
-        if res != []:
-            with ProcessPoolExecutor(max_workers=pool_count) as pool4:
-                result = pool4.map(Add_Data_To_Url, res)
-        # 每爆破一个子域名，歇会儿
-        time.sleep(360)
 
 
 
 def Run_Crawl(Domains):
     Domains = ['.'+str(x) for x in Domains]
     while 1:
-        close_old_connections()
+        # close_old_connections()
+        time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         try:
@@ -459,8 +406,7 @@ def Run_Crawl(Domains):
                 target_url.get = '是'
                 target_url.save()
             except Exception as e:
-                print('错误代码 [31] {}'.format(str(e)))
-                Error_Log.objects.create(url='获取URL失败', error='错误代码 [31] {}'.format(str(e)))
+                Except_Log(stat=31, url='|获取URL失败|', error=str(e))
                 return
         try:
             All_Urls = set(Crawl(url))
@@ -469,50 +415,97 @@ def Run_Crawl(Domains):
                 try:
                     Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
                     if list(Sub_Domains1) != []:
-                        with ProcessPoolExecutor(max_workers=pool_count) as pool1:
+                        with ThreadPoolExecutor(max_workers=pool_count) as pool1:
                             result = pool1.map(Add_Data_To_Url, list(Sub_Domains1))
                     Other_Domains = list(All_Urls-Sub_Domains1)
                 except Exception as e:
-                    print('错误代码 [11] {}'.format(str(e)))
-                    Error_Log.objects.create(url=url, error='错误代码 [11] {}'.format(str(e)))
+                    Except_Log(stat=11, url='|获取URL失败|', error=str(e))
+
                 if Other_Domains != [] and Other_Domains != None:
-                    for urle in Other_Domains:
-                        try:
-                            Test_Other_Url = list(Other_Url.objects.filter(url=urle))
-                            if Test_Other_Url == []:
-                                ip = get_host(urle)
-                                res = Get_Url_Info(urle).get_info()
-                                res_url = res.get('url')
-                                try:
-                                    res_title = pymysql.escape_string(res.get('title'))
-                                except:
-                                    res_title = 'Error'
-                                res_power = res.get('power')
-                                res_server = res.get('server')
-                                status = res.get('status')
-                                res_ip = ip
-                                #if int(status) in Alive_Status:
-                                try:
-                                    Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
-                                except Exception as e:
-                                    print('错误代码 [33] {}'.format(str(e)))
-                                    Error_Log.objects.create(url=url+'|资产爬行错误', error='错误代码 [33] {}'.format(str(e)))
-                                    Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
+                    try:
+                        for urle in Other_Domains:
+                            try:
+                                Test_Other_Url = list(Other_Url.objects.filter(url=urle))
+                                if Test_Other_Url == []:
+                                    ip = get_host(urle)
+                                    res = Get_Url_Info(urle).get_info()
+                                    res_url = res.get('url')
+                                    try:
+                                        res_title = pymysql.escape_string(res.get('title'))
+                                    except:
+                                        res_title = 'Error'
+                                    res_power = res.get('power')
+                                    res_server = res.get('server')
+                                    status = res.get('status')
+                                    res_ip = ip
+                                    #if int(status) in Alive_Status:
+                                    try:
+                                        Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
+                                    except Exception as e:
+                                        Except_Log(stat=33, url=url+'|资产爬行错误|', error=str(e))
+                                        Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
 
-                        except Exception as e:
-                            print('错误代码 [33] {}'.format(str(e)))
-                            Error_Log.objects.create(url=url, error='错误代码 [33] {}'.format(str(e)))
+                            except Exception as e:
+                                Except_Log(stat=37, url=url + '|资产爬行错误|', error=str(e))
+                    except Exception as e:
+                        Except_Log(stat=36, url=url + '|资产爬行错误|', error=str(e))
+
         except Exception as e:
-            print('错误代码 [32] {}'.format(str(e)))
-            Error_Log.objects.create(url=url, error='错误代码 [32] {}'.format(str(e)))
+            Except_Log(stat=32, url=url + '|网址爬行错误|', error=str(e))
 
+def Sub_Baidu(Sub_Domains):
+    while 1:
+        # close_old_connections()
+        res = []
+        for sub_domain in Sub_Domains:
+            res = Baidu(sub_domain)
+            if res != []:
+                with ThreadPoolExecutor(max_workers=pool_count) as pool3:
+                    result = pool3.map(Add_Data_To_Url, list(set(res)))
+            time.sleep(60)
+            # 每次扫完一个域名等待一小会儿
+        time.sleep(3600*12)
+
+def Sub_Brute(Sub_Domains):
+    while 1:
+        for domain in Sub_Domains:
+            res = []
+            res = Brute(domain).start()
+            res = list(set(res))
+            if res != []:
+                with ThreadPoolExecutor(max_workers=pool_count) as pool4:
+                    result = pool4.map(Add_Data_To_Url, res)
+            # 每爆破一个子域名，歇会儿
+            time.sleep(360)
+        time.sleep(3600*24)
 
 def Sub_Crawl(pax,Sub_Domains):
-    p2 = ProcessPoolExecutor(max_workers=pool_count)
-    for i in pax:
-        p2.submit(Run_Crawl,Sub_Domains)
-        p2.submit(Change_IP_Info)
-        p2.submit(Change_ShowData_Info,Sub_Domains)
+    p = Pool(processes=pool_count)
+    for i in range(pool_count):
+        p.apply_async(Run_Crawl,args=(Sub_Domains,))
+    p.close()
+    p.join()
+
+
+    # with ProcessPoolExecutor(max_workers=pool_count) as p:
+    #     for i in pax:
+    #         p.submit(Run_Crawl(Sub_Domains))
+
+def Sub_ChangeIp(pax):
+    p0 = Pool(processes=pool_count)
+    for i in range(pool_count):
+        p0.apply_async(Change_IP_Info)
+    p0.close()
+    p0.join()
+
+    # with ProcessPoolExecutor(max_workers=pool_count) as p:
+    #     for i in pax:
+    #         p.submit(Change_IP_Info)
+
+def Sub_ChangeInf(Sub_Domains):
+    Change_ShowData_Info(Sub_Domains)
+
+
 
 if __name__ == '__main__':
     pass

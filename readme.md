@@ -59,6 +59,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 	default-storage-engine=InnoDB
 	max_connections=128
 	max_allowed_packet = 500M
+	default_authentication_plugin=mysql_native_password
 	log-error="E:/phpstudy_pro/Extensions/MySQL8.0.12/error.log"  
 	# 这里的日志输出自己修改路径
 

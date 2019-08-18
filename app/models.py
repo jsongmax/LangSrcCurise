@@ -64,8 +64,8 @@ class URL(models.Model):
 class Other_Url(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=100,unique=True,verbose_name='爬行网址')
-    title = models.CharField(max_length=120, default='None',verbose_name='网站标题')
-    power = models.CharField(max_length=100, default='None',verbose_name='容器/语言')
+    title = models.CharField(max_length=220, default='None',verbose_name='网站标题')
+    power = models.CharField(max_length=200, default='None',verbose_name='容器/语言')
     server = models.CharField(max_length=100, default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
     ip = models.CharField(max_length=15,verbose_name='IP地址')
@@ -79,7 +79,7 @@ class Setting(models.Model):
     name = models.CharField(max_length=30,default='萌萌哒屎壳郎一号方案',verbose_name='配置方案')
     Alive_Code = models.CharField(max_length=250,default='[200,204,206,301,302,304,401,402,403,404,500,501,502,503]',verbose_name='允许入库状态码')
     Thread = models.CharField(max_length=4,default='2', verbose_name='线程数量')
-    Pool = models.CharField(max_length=4,default='3',  verbose_name='进程池量')
+    Pool = models.CharField(max_length=4,default='4',  verbose_name='线程池量')
     processes = models.CharField(max_length=4,default='4',  verbose_name='进程数量')
     childconcurrency = models.CharField(max_length=4,default='8',  verbose_name='子协程数量')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
@@ -91,7 +91,7 @@ class Setting(models.Model):
 class Show_Data(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=50,unique=True,verbose_name='展示网址')
-    title = models.CharField(max_length=100,default='None',verbose_name='网站标题')
+    title = models.CharField(max_length=200,default='None',verbose_name='网站标题')
     power = models.CharField(max_length=150,default='None',verbose_name='容器/语言')
     server = models.CharField(max_length=150,default='None',verbose_name='服务器类型')
     status = models.CharField(max_length=4,default='None',verbose_name='请求响应')
