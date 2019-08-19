@@ -150,6 +150,9 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 1. python3 manage.py startscan
 
+
+如果出现大量的Mysql数据库报错，关闭窗口重新执行上命令
+
 需要管理员权限
 
 
