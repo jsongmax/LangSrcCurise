@@ -31,10 +31,12 @@ Alive_Status = eval(Set.Alive_Code)
 childconcurrency = int(Set.childconcurrency)
 
 Dicts = os.path.join('Auxiliary','SubDomainDict.list')
+#Dicts = 'SubDomainDict.list'
 sub_lists = list(set([x.strip() for x in open(Dicts,'r').readlines()]))
 
 
 cert_path = os.path.join('Auxiliary','cacert.pem')
+#cert_path = 'cacert.pem'
 import aiodns,asyncio,socket,os,ssl
 import socket
 def get_host(url):
@@ -112,7 +114,7 @@ class Brute:
     async def Aio_Subdomain(self,subdomain):
         # 传入参数为 xx.xx.com 返回结果为 xx.xx.com [解析结果]
         # 不存在则返回 NONE NOEN
-        resolver = aiodns.DNSResolver(timeout=1)
+        resolver = aiodns.DNSResolver(timeout=3)
         try:
             result = await resolver.query(subdomain, 'A')
             return subdomain, result[0].host
@@ -127,8 +129,9 @@ class Brute:
         for result in results:
             subdomain, answers = result
             if answers != None and subdomain != None:
+                # res.add(subdomain)
                 if answers != self.FakeDomain_IP:
-                    # 这里则确认不存在泛解析
+                    # 这里则确认不存在泛解析,可以，但是没必要
                     res.add(subdomain)
                 else:
                     res.add(self.FakeDomain_IP)
@@ -137,11 +140,11 @@ class Brute:
     def get_result_from_dns_result(self,loop):
         # 返回结果是通过DNS查询获取的子域名
         result = loop.run_until_complete(self.get_result_from_dns(self.dicts))
-        #return result
-        if len(result) > 1329: # 泛解析
-            return random.sample(result,10)
-        else:
-            return result
+        return result
+        # if len(result) > 1329: # 泛解析
+        #     return random.sample(result,10)
+        # else:
+        #     return result
 
     async def main(self,urls):
         async with aiomultiprocess.Pool(processes=processes,childconcurrency=childconcurrency) as pool:
@@ -163,9 +166,7 @@ class Brute:
         return alive_urls
 
 
-
-
 if __name__ == '__main__':
-    r = Brute('baidu.com')
+    r = Brute('qq.com')
     res = r.start()
     print(res)

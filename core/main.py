@@ -24,12 +24,16 @@ from django.db import connections
 from concurrent.futures import ThreadPoolExecutor,ProcessPoolExecutor
 from multiprocessing import Pool
 import threading
+import multiprocessing
+
+#Sem = multiprocessing.Manager().BoundedSemaphore(1)
 
 def Except_Log(stat,url,error):
     # close_old_connections()
     print('错误代码 [{}] {}'.format(stat,str(error)))
+   #  Sem.acquire()
     Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
-
+    # Sem.release()
 
 def close_old_connections():
     for conn in connections.all():
@@ -47,7 +51,9 @@ def Run_Cpu_Min():
         try:
             c = Cor()
             cpu, men, new_send, new_recv = c[0], c[1], c[2], c[3]
+            sem.acquire()
             Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
+            # Sem.release()
 
         except Exception as e:
             Except_Log(stat=16,url='资源监控消耗',error=str(e))
@@ -67,8 +73,13 @@ def get_host(url):
         s = socket.gethostbyname(url)
         return s
     except Exception as e:
-        Except_Log(stat=24, url=url+'|获取IP失败', error=str(e))
-        return '获取失败'
+        time.sleep(2)
+        try:
+            s = socket.gethostbyname(url)
+            return s
+        except Exception as e:
+            Except_Log(stat=24, url=url+'|获取IP失败', error=str(e))
+            return '获取失败'
 
 
 
@@ -80,8 +91,9 @@ def Add_Data_To_Url(url):
         if ip == '获取失败':
             return
         # print('[+ Domain UrlIP] IP解析 --> {}  IP --> {}'.format(url, ip))
+       #  Sem.acquire()
         test_url = list(URL.objects.filter(url=url))
-
+        # Sem.release()
         # 如果数据库有这个网站的话，就直接退出
         if test_url != []:
             return
@@ -416,10 +428,13 @@ def Run_Crawl(Domains):
                 target_url0.get = '是'
                 target_url0.save()
             except Exception as e:
-                Except_Log(stat=31, url='|获取URL失败|', error=str(e))
+                Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
                 return
         try:
-            All_Urls = set(Crawl(url))
+            All_Urls = Crawl(url)
+            if All_Urls == []:
+                return
+            All_Urls = set(All_Urls)
             Other_Domains = []
             if list(All_Urls) != [] and All_Urls != None:
                 try:
@@ -480,13 +495,14 @@ def Sub_Brute(Sub_Domains):
     while 1:
         for domain in Sub_Domains:
             res = []
-            res = Brute(domain).start()
+            Br = Brute(domain)
+            res = Br.start()
             res = list(set(res))
             if res != []:
                 with ThreadPoolExecutor(max_workers=pool_count) as pool4:
                     result = pool4.map(Add_Data_To_Url, res)
             # 每爆破一个子域名，歇会儿
-            time.sleep(360)
+            time.sleep(60)
         time.sleep(3600*24)
 
 def Sub_Crawl(pax,Sub_Domains):
@@ -520,7 +536,8 @@ def Sub_ChangeInf(Sub_Domains):
 if __name__ == '__main__':
     pass
     #Domains = list(set([x.strip() for x in open('domains.list', 'r', encoding='utf-8').readlines()]))
-    #Domains = ['baidu.com','qq.com','jd.com','iqiyi.com','kuaishou.com','sina.com']
+    Domains = ['baidu.com','qq.com','jd.com','iqiyi.com','kuaishou.com','sina.com']
+    res = Sub_Brute(Domains)
+
     # Sub_Baidu(Domains)
-    # Sub_Brute(Domains)
     # Sub_Crawl(range(20),Domains)

@@ -228,7 +228,7 @@ headerss = [
 first_cule = ['.com.cn', '.org.cn', '.net.cn', '.com', '.cn', '.cc', '.net', '.org', '.info', '.fun', '.one', '.xyz',
               '.name', '.io', '.top', '.me', '.club', '.tv']
 
-def Crawl(url):
+def Crawl_Links(url):
     '''
 
     根据传入网址
@@ -359,6 +359,13 @@ def Crawl(url):
             pass
     print('[+ Crawl UrlLinks] 爬行网址: {} 友链存活数量 : {}'.format(url,len(returl_list)))
     return list(returl_list)
+
+def Crawl(url):
+    result = Crawl_Links(url)
+    if result == None or result == []:
+        return []
+    else:
+        return result
 
 if __name__ == '__main__':
     r = Crawl('http://www.langzi.fun')

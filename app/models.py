@@ -117,7 +117,7 @@ class Show_Data(models.Model):
 class Error_Log(models.Model):
     uid = models.AutoField(primary_key=True)
     url = models.CharField(max_length=100,verbose_name='异常网址')
-    error = models.CharField(max_length=400,verbose_name='报错内容')
+    error = models.TextField(verbose_name='报错内容')
     change_time = models.DateTimeField(auto_now=True,verbose_name='修改时间')
     class Meta:
         db_table = 'Error_Log'

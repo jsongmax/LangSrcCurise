@@ -3,9 +3,10 @@ from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_Cha
 import pymysql
 import contextlib
 import configparser
-
+import multiprocessing
 from concurrent.futures import ProcessPoolExecutor
 from multiprocessing import Process
+
 cfg = configparser.ConfigParser()
 cfg.read('config.ini')
 
@@ -14,7 +15,6 @@ username = cfg.get("Server", "username")
 password = cfg.get("Server", "password")
 Dbname = cfg.get("Server","dbname").lower()
 port = int(cfg.get("Server","port"))
-
 
 @contextlib.contextmanager
 def co_mysql(db='mysql'):
@@ -42,9 +42,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE","LangSrcCurise.settings")
 django.setup()
 from app.models import Domains,Setting
 import time
-
-
-
 import sys,os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0,os.path.join(BASE_DIR,'ExtrApps'))
@@ -52,7 +49,7 @@ sys.path.insert(0,os.path.join(BASE_DIR,'ExtrApps'))
 
 def start():
     print('''
-
+    
              _                           _
             | |                         (_)
             | |     __ _ _ __   __ _ _____
@@ -61,7 +58,7 @@ def start():
             |______\__,_|_| |_|\__, /___|_|
                                 __/ |      
                                |___/       
-
+    
     ''')
     print('Main Console Start Running....')
     try:
@@ -95,6 +92,9 @@ def start():
     #     Sub_Brute(Sub_Domains)
     #     time.sleep(3600*24)
 
+
+
+
     p2 = Process(target=Sub_Baidu,args=(Sub_Domains,))
     p3 = Process(target=Sub_Crawl,args=(pax,Sub_Domains,))
     p4 = Process(target=Run_Cpu_Min)
@@ -111,5 +111,6 @@ def start():
     p7.start()
 
 
+
 if __name__ == '__main__':
-    start()
+    pass

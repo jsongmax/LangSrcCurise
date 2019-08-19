@@ -93,7 +93,7 @@ def Crawl_Bing(domain):
         "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"
     }
     for i in range(0,1000,10):
-        time.sleep(random.randint(5,15))
+        time.sleep(random.randint(2,6))
         url = "https://cn.bing.com/search?q={}&ensearch=1&first={}".format('site:'+domain, i)
         try:
             r = requests.get(url,headers=headers,timeout=10,verify=False)
@@ -113,7 +113,7 @@ def Crawl_Sougou(domain):
     result = set()
     headers = {'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8', 'Accept-Encoding': 'gzip, deflate, br', 'Accept-Language': 'zh,zh-CN;q=0.9,en-US;q=0.8,en;q=0.7', 'Cache-Control': 'max-age=0', 'Connection': 'keep-alive', 'Cookie': 'SUV=1545365636161081; SMYUV=1545365636162598; CXID=00BEDBD52384CAA240287B8117915D4C; SUID=7636BA753865860A5C289DDF000F3BB7; IPLOC=CN3100; usid=meBNHqDlm_fUMnfS; sct=4; ABTEST=0|1565523728|v17; SNUID=76C98C489B9F144E7F2FAC2A9B62CB65; ld=GZllllllll2NF@DylllllVC5@ellllll1PBvEyllll9llllljZlll5@@@@@@@@@@; browerV=3; osV=1', 'Host': 'www.sogou.com', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'}
     for i in range(1,50):
-        time.sleep(random.randint(5,15))
+        time.sleep(random.randint(2,6))
         url = "https://www.sogou.com/sogou?query={}&page={}".format('site:'+domain, i)
         try:
             r = requests.get(url,headers=headers,timeout=10,verify=False)
@@ -137,7 +137,7 @@ def Cralw_Baidu(domainkey):
     result = set()
     domain = domainkey
     for page in range(0,1000,10):
-        time.sleep(random.randint(5,15))
+        time.sleep(random.randint(2,6))
         url = 'http://www.baidu.com/s?wd=site%3A{}&pn={}'.format(quote(domainkey),page)
         try:
             resp = Get_Resp(url)

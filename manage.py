@@ -1,10 +1,10 @@
+# coding:utf-8
 #!/usr/bin/env python
 import os
 import sys
 import pymysql
 import contextlib
 import configparser
-
 
 cfg = configparser.ConfigParser()
 cfg.read('config.ini')
@@ -34,9 +34,8 @@ with co_mysql(db='mysql') as cursor:
    if Dbname.lower() in b:
        pass
    else:
-       cursor.execute('create database {} DEFAULT CHARSET=utf8'.format(Dbname))
+       cursor.execute('create database {} DEFAULT CHARSET=utf8mb4'.format(Dbname))
        cursor.execute("SET @@global.sql_mode= '';")
-       cursor.execute('ALTER DATABASE {} DEFAULT CHARACTER SET utf8mb4'.format(Dbname))
 
 if __name__ == '__main__':
     import multiprocessing
@@ -44,9 +43,11 @@ if __name__ == '__main__':
     if sys.argv[1] == 'initial':
         from initialize.initialdomains import initialdomains
         initialdomains()
+
     elif sys.argv[1] == 'startscan':
         from core.Run_Tasks import start
         start()
+
     else:
         os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'LangSrcCurise.settings')
         try:
