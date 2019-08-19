@@ -55,7 +55,6 @@ def Run_Cpu_Min():
         try:
             c = Cor()
             cpu, men, new_send, new_recv = c[0], c[1], c[2], c[3]
-            sem.acquire()
             Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
             # Sem.release()
 
@@ -232,7 +231,7 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
-            time.sleep(600)
+            time.sleep(360)
             # 等待并充实一次
             try:
                 target_ip2 = IP.objects.filter(get='否')[0]
@@ -318,7 +317,7 @@ def Change_IP_Info():
 
 def Change_ShowData_Info(Sub_Domains):
         # close_old_connections()
-        time.sleep(random.randint(1, 20))
+        # time.sleep(random.randint(1, 20))
         # 线程同步
         try:
             target_info = Show_Data.objects.filter(success='否')[0]
@@ -327,14 +326,14 @@ def Change_ShowData_Info(Sub_Domains):
             Data_IP = IP.objects.filter(ip=ip)[0]
             if Data_IP.get == '否' or Data_IP.get == '中':
                 # 如果收集整理的数据还没有获取完成
-                time.sleep(600)
+                time.sleep(300)
                 return
             else:
                 target_info.get = '中'
                 # 这里就不要设置检查状态了，等到最后再设置
                 target_info.save()
         except Exception as e:
-            time.sleep(600)
+            time.sleep(300)
             # 等待并充实一次
             try:
                 target_info9 = Show_Data.objects.filter(success='否')[0]
