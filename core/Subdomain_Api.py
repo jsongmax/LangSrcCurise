@@ -49,7 +49,14 @@ def Requests(url):
                 u = urlparse(str(r.url))
                 return u.scheme+'://'+u.netloc
     except:
-        return None
+        try:
+            r = requests.get(url=url.replace('http://','https://'), headers=headers, verify=False, timeout=10)
+            if b'Service Unavailable' not in r.content and b'The requested URL was not found on' not in r.content and b'The server encountered an internal error or miscon' not in r.content:
+                if r.status_code in Alive_Status:
+                    u = urlparse(str(r.url))
+                    return u.scheme + '://' + u.netloc
+        except:
+            return None
 
 
 def Get_Alive_Url(urls):
@@ -88,7 +95,6 @@ def Api(domain):
             bla = check_black(u)
             if bla == False:
                 mid.add('http://'+u)
-                mid.add('https://'+u)
     if mid != {}:
         result = Get_Alive_Url(list(mid))
         print('[+ BaiDu API] 百度接口 : {} 捕获子域名存活总数 : {}'.format(domain, len(result)))
