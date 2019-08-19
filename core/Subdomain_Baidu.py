@@ -136,7 +136,7 @@ def Cralw_Baidu(domainkey):
     '''
     result = set()
     domain = domainkey
-    for page in range(0,1000,10):
+    for page in range(0,500,10):
         time.sleep(random.randint(2,6))
         url = 'http://www.baidu.com/s?wd=site%3A{}&pn={}'.format(quote(domainkey),page)
         try:
@@ -206,7 +206,7 @@ def Baidu(domain):
             headers = {'User-Agent': UA, 'Connection': 'close'}
             r = requests.get(url=real, headers=headers, verify=False, timeout=timeout)
             time.sleep(0.5)
-            if b'Service Unavailable' not in r.content and b'The requested URL was not found on' not in r.content and b'The server encountered an internal error or miscon' not in r.content and '.show.jj.cn' not in real and 'en.alibaba.com ' not in real:
+            if b'Service Unavailable' not in r.content and b'The requested URL was not found on' not in r.content and b'The server encountered an internal error or miscon' not in r.content:
                 if r.status_code in Alive_Status:
                 # 这里读取验证码即可
                     real_url = r.url.rstrip('/')

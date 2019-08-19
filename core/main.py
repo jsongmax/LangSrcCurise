@@ -5,6 +5,7 @@ import time
 from core.Subdomain_Baidu import Baidu
 from core.Subdomain_Brute import Brute
 from core.Subdomain_Crawl import Crawl
+from core.Subdomain_Api import Api
 from core.Url_Info import Get_Url_Info
 from core.Host_Info import Get_Ip_Info,Get_Alive_Url
 from core.Cor import Cor
@@ -29,11 +30,11 @@ import multiprocessing
 #Sem = multiprocessing.Manager().BoundedSemaphore(1)
 
 def Except_Log(stat,url,error):
-    # close_old_connections()
     print('错误代码 [{}] {}'.format(stat,str(error)))
-   #  Sem.acquire()
-    Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
-    # Sem.release()
+    try:
+        Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
+    except:
+        Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
 
 def close_old_connections():
     for conn in connections.all():
@@ -43,6 +44,9 @@ def close_old_connections():
 Set = Setting.objects.all()[0]
 pool_count = int(Set.Pool)
 Alive_Status = eval(Set.Alive_Code)
+
+BA = Domains.objects.all()
+ALL_DOMAINS = [x.get('url') for x in BA.values()]
 
 
 def Run_Cpu_Min():
@@ -84,7 +88,6 @@ def get_host(url):
 
 
 def Add_Data_To_Url(url):
-    time.sleep(random.randint(1,20))
     # close_old_connections()
     try:
         ip = get_host(url)
@@ -92,7 +95,14 @@ def Add_Data_To_Url(url):
             return
         # print('[+ Domain UrlIP] IP解析 --> {}  IP --> {}'.format(url, ip))
        #  Sem.acquire()
-        test_url = list(URL.objects.filter(url=url))
+        try:
+            test_url = list(URL.objects.filter(url=url))
+        except:
+            try:
+                test_url = list(URL.objects.filter(url=url))
+            except:
+                test_url = list(URL.objects.filter(url=url))
+
         # Sem.release()
         # 如果数据库有这个网站的话，就直接退出
         if test_url != []:
@@ -160,10 +170,7 @@ def Add_Data_To_Url(url):
                     # 添加网页内容，数据展示
                 except Exception as e:
                     Except_Log(stat=8, url=url + '|外键添加错误', error=str(e))
-                BA = Domains.objects.all()
-                ALL_DOMAINS = [x.get('url') for x in BA.values()]
-                # 所有监控域名
-                # print('所有域名：{}'.format(ALL_DOMAINS))
+
                 This_Sub = [x for x in ALL_DOMAINS if x in url]
                 # 获取到当前子域名属于的主域名
             try:
@@ -179,6 +186,8 @@ def Add_Data_To_Url(url):
                 Except_Log(stat=15, url=url +'|获取归属域名失败|'+This_Sub, error=str(e))
         except Exception as e:
             Except_Log(stat=22, url=url + '|添加到网址索引表失败|', error=str(e))
+
+
         test_ip = list(IP.objects.filter(ip=ip))
         # 开始添加ip 维护ip统一
         # 这里开始判断数据库中是否有这个ip，并且先添加然后修改(防止重复浪费资源)
@@ -211,8 +220,9 @@ def Add_Data_To_Url(url):
 
 
 def Change_IP_Info():
-    while 1:
         # close_old_connections()
+        time.sleep(random.randint(1,20))
+        time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
         try:
             target_ip = IP.objects.filter(get='否')[0]
@@ -222,13 +232,13 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
-            time.sleep(360)
+            time.sleep(600)
             # 等待并充实一次
             try:
-                target_ip = IP.objects.filter(get='否')[0]
-                ip = target_ip.ip
-                target_ip.get = '中'
-                target_ip.save()
+                target_ip2 = IP.objects.filter(get='否')[0]
+                ip = target_ip2.ip
+                target_ip2.get = '中'
+                target_ip2.save()
             except Exception as e:
                 Except_Log(stat=39, url='|获取数据库 IP 资产失败|', error=str(e))
                 return
@@ -262,9 +272,9 @@ def Change_IP_Info():
         except Exception as e:
             Except_Log(stat=53, url='|清洗 IP 资产失败|', error=str(e))
             # 这里如果失败，则回退
-            IP_Obj = IP.objects.filter(ip=ip)[0]
-            IP_Obj.get = '否'
-            IP_Obj.save()
+            IP_Obj_f = IP.objects.filter(ip=ip)[0]
+            IP_Obj_f.get = '否'
+            IP_Obj_f.save()
         '''
         下面的代码，是获取ip的c段存活主机，然后加载到扫描计划中，老夫先注释了
         '''
@@ -307,7 +317,6 @@ def Change_IP_Info():
 
 
 def Change_ShowData_Info(Sub_Domains):
-    while 1:
         # close_old_connections()
         time.sleep(random.randint(1, 20))
         # 线程同步
@@ -328,20 +337,20 @@ def Change_ShowData_Info(Sub_Domains):
             time.sleep(600)
             # 等待并充实一次
             try:
-                target_info = Show_Data.objects.filter(success='否')[0]
-                ip = target_info.ip
-                url = target_info.url
+                target_info9 = Show_Data.objects.filter(success='否')[0]
+                ip = target_info9.ip
+                url = target_info9.url
                 Data_IP = IP.objects.filter(ip=ip)[0]
                 if Data_IP.get == '否' or Data_IP.get == '中':
                     # 如果收集整理的数据还没有获取完成
                     time.sleep(360)
                     return
                 else:
-                    target_info.get = '中'
+                    target_info9.get = '中'
                     # 这里就不要设置检查状态了，等到最后再设置
-                    target_info.save()
+                    target_info9.save()
             except Exception as e:
-                Except_Log(stat=41, url=url + '|清洗数据流程获取数据失败|', error=str(e))
+                Except_Log(stat=41, url= '|清洗数据流程获取数据失败|', error=str(e))
                 return
         print('[+ DataInfo Collection] 数据整理清洗 : {} --> {}'.format(url,ip))
         try:
@@ -395,9 +404,9 @@ def Change_ShowData_Info(Sub_Domains):
             ShowS_DataD.save()
         except Exception as e:
             Except_Log(stat=43, url=url + '|'+ip+'|清洗数据流程获取数据失败|', error=str(e))
-            ShowS_DataD = Show_Data.objects.filter(url=url)[0]
-            ShowS_DataD.success = '否'
-            ShowS_DataD.save()
+            ShowS_DataD_f = Show_Data.objects.filter(url=url)[0]
+            ShowS_DataD_f.success = '否'
+            ShowS_DataD_f.save()
 # def Run_Baidu(url):
 #     # 这里对传入Baidu进行重写，该函数接受一个参数域名，返回参数对应的网址，列表格式
 #
@@ -408,75 +417,89 @@ def Change_ShowData_Info(Sub_Domains):
 
 def Run_Crawl(Domains):
     Domains = ['.'+str(x) for x in Domains]
-    while 1:
-        # close_old_connections()
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
+    # close_old_connections()
+    time.sleep(random.randint(1, 20))
+    time.sleep(random.randint(1, 20))
+    time.sleep(random.randint(1, 20))
+    try:
+        target_url = URL.objects.filter(get='否')[0]
+        url = target_url.url
+        target_url.get = '是'
+        target_url.save()
+        # 这里需要提前设置的原因是，防止下一个进程启动重复 使用 同一个数据
+    except Exception as e:
+        time.sleep(600)
+        # 在获取失败（数据库没数据存入），重试一次
         try:
-            target_url = URL.objects.filter(get='否')[0]
-            url = target_url.url
-            target_url.get = '是'
-            target_url.save()
-            # 这里需要提前设置的原因是，防止下一个进程启动重复 使用 同一个数据
+            target_url0 = URL.objects.filter(get='否')[0]
+            url = target_url0.url
+            target_url0.get = '是'
+            target_url0.save()
         except Exception as e:
-            time.sleep(600)
-            # 在获取失败（数据库没数据存入），重试一次
+            Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
+            return
+    try:
+        All_Urls = Crawl(url)
+        if All_Urls == []:
+            return
+        All_Urls = set(All_Urls)
+        Other_Domains = []
+        if list(All_Urls) != [] and All_Urls != None:
             try:
-                target_url0 = URL.objects.filter(get='否')[0]
-                url = target_url0.url
-                target_url0.get = '是'
-                target_url0.save()
+                Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
+                if list(Sub_Domains1) != []:
+                    with ThreadPoolExecutor(max_workers=pool_count) as pool1:
+                        result = pool1.map(Add_Data_To_Url, list(Sub_Domains1))
+                Other_Domains = list(All_Urls-Sub_Domains1)
             except Exception as e:
-                Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
-                return
-        try:
-            All_Urls = Crawl(url)
-            if All_Urls == []:
-                return
-            All_Urls = set(All_Urls)
-            Other_Domains = []
-            if list(All_Urls) != [] and All_Urls != None:
+                Except_Log(stat=11, url='|获取URL失败|', error=str(e))
+            if Other_Domains != [] and Other_Domains != None:
                 try:
-                    Sub_Domains1 = set([y for x in Domains for y in All_Urls if x in y])
-                    if list(Sub_Domains1) != []:
-                        with ThreadPoolExecutor(max_workers=pool_count) as pool1:
-                            result = pool1.map(Add_Data_To_Url, list(Sub_Domains1))
-                    Other_Domains = list(All_Urls-Sub_Domains1)
-                except Exception as e:
-                    Except_Log(stat=11, url='|获取URL失败|', error=str(e))
-
-                if Other_Domains != [] and Other_Domains != None:
-                    try:
-                        for urle in Other_Domains:
+                    for urle in Other_Domains:
+                        try:
                             try:
                                 Test_Other_Url = list(Other_Url.objects.filter(url=urle))
-                                if Test_Other_Url == []:
-                                    ip = get_host(urle)
-                                    res = Get_Url_Info(urle).get_info()
-                                    res_url = res.get('url')
-                                    try:
-                                        res_title = pymysql.escape_string(res.get('title'))
-                                    except:
-                                        res_title = 'Error'
-                                    res_power = res.get('power')
-                                    res_server = res.get('server')
-                                    status = res.get('status')
-                                    res_ip = ip
-                                    #if int(status) in Alive_Status:
-                                    try:
-                                        Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
-                                    except Exception as e:
-                                        Except_Log(stat=33, url=url+'|资产爬行错误|', error=str(e))
-                                        Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
+                            except:
+                                Test_Other_Url = list(Other_Url.objects.filter(url=urle))
+                            if Test_Other_Url == []:
+                                ip = get_host(urle)
+                                res = Get_Url_Info(urle).get_info()
+                                res_url = res.get('url')
+                                try:
+                                    res_title = pymysql.escape_string(res.get('title'))
+                                except:
+                                    res_title = 'Error'
+                                res_power = res.get('power')
+                                res_server = res.get('server')
+                                status = res.get('status')
+                                res_ip = ip
+                                #if int(status) in Alive_Status:
+                                try:
+                                    Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
+                                except Exception as e:
+                                    Except_Log(stat=33, url=url+'|资产爬行错误|', error=str(e))
+                                    Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
+                        except Exception as e:
+                            Except_Log(stat=37, url=url + '|资产爬行错误|', error=str(e))
+                except Exception as e:
+                    Except_Log(stat=36, url=url + '|资产爬行错误|', error=str(e))
 
-                            except Exception as e:
-                                Except_Log(stat=37, url=url + '|资产爬行错误|', error=str(e))
-                    except Exception as e:
-                        Except_Log(stat=36, url=url + '|资产爬行错误|', error=str(e))
+    except Exception as e:
+        Except_Log(stat=32, url=url + '|网址爬行错误|', error=str(e))
 
-        except Exception as e:
-            Except_Log(stat=32, url=url + '|网址爬行错误|', error=str(e))
+
+
+def Sub_Api(Sub_Domains):
+    while 1:
+        res = []
+        for sub_domain in Sub_Domains:
+            res = Api(sub_domain)
+            if res != [] and res != None:
+                with ThreadPoolExecutor(max_workers=pool_count) as pool4:
+                    result = pool4.map(Add_Data_To_Url, list(set(res)))
+            time.sleep(60)
+            # 每次扫完一个域名等待一小会儿
+        time.sleep(3600 * 36)
 
 def Sub_Baidu(Sub_Domains):
     while 1:
@@ -505,31 +528,31 @@ def Sub_Brute(Sub_Domains):
             time.sleep(60)
         time.sleep(3600*24)
 
+
+
+def Start_Crawl_Run(Sub_Domains):
+    while 1:
+        Run_Crawl(Sub_Domains)
+def Start_ChangeIp_Run():
+    while 1:
+        Change_IP_Info()
+
 def Sub_Crawl(pax,Sub_Domains):
     p = Pool(processes=pool_count)
     for i in range(pool_count):
-        p.apply_async(Run_Crawl,args=(Sub_Domains,))
+        p.apply_async(Start_Crawl_Run,args=(Sub_Domains,))
     p.close()
     p.join()
-
-
-    # with ProcessPoolExecutor(max_workers=pool_count) as p:
-    #     for i in pax:
-    #         p.submit(Run_Crawl(Sub_Domains))
-
 def Sub_ChangeIp(pax):
     p0 = Pool(processes=pool_count)
     for i in range(pool_count):
-        p0.apply_async(Change_IP_Info)
+        p0.apply_async(Start_ChangeIp_Run)
     p0.close()
     p0.join()
 
-    # with ProcessPoolExecutor(max_workers=pool_count) as p:
-    #     for i in pax:
-    #         p.submit(Change_IP_Info)
-
 def Sub_ChangeInf(Sub_Domains):
-    Change_ShowData_Info(Sub_Domains)
+    while 1:
+        Change_ShowData_Info(Sub_Domains)
 
 
 

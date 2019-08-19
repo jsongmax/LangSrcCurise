@@ -1,5 +1,5 @@
 # coding:utf-8
-from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf
+from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf,Sub_Api
 import pymysql
 import contextlib
 import configparser
@@ -93,14 +93,14 @@ def start():
     #     time.sleep(3600*24)
 
 
-
-
+    p1 = Process(target=Sub_Api,args=(Sub_Domains,))
     p2 = Process(target=Sub_Baidu,args=(Sub_Domains,))
     p3 = Process(target=Sub_Crawl,args=(pax,Sub_Domains,))
     p4 = Process(target=Run_Cpu_Min)
     p6 = Process(target=Sub_ChangeIp,args=(pax,))
     p7 = Process(target=Sub_ChangeInf,args=(Sub_Domains,))
     p5 = Process(target=Sub_Brute,args=(Sub_Domains,))
+    p1.start()
     p2.start()
     p3.start()
     p4.start()
