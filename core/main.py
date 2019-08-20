@@ -231,7 +231,7 @@ def Change_IP_Info():
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
-
+        time.sleep(random.randint(1,20))
         # 首先捕获一个值，设置为扫描中状态，但是要确保是事务
         try:
             target_ip = IP.objects.filter(get='否')[0]
@@ -284,16 +284,23 @@ def Change_IP_Info():
             except:
                 # 这里重试的原因是有可能因为失去链接导致无法保存
                 # 但是扫描ip是耗时操作，获取的数据不能轻易的舍弃，重试一次
-                close_old_connections()
-                IP_Obj = IP.objects.filter(ip=ip)[0]
-                IP_Obj.ip = IP_Obj_ip
-                IP_Obj.host_type = IP_Obj_host_type
-                IP_Obj.alive_urls = IP_Obj_alive_urls
-                IP_Obj.servers = IP_Obj_servers
-                IP_Obj.area = IP_Obj_area
-                IP_Obj.cs = IP_Obj_cs
-                IP_Obj.get = IP_Obj_get
-                IP_Obj.save()
+                try:
+                    close_old_connections()
+                    IP_Obj = IP.objects.filter(ip=ip)[0]
+                    IP_Obj.ip = IP_Obj_ip
+                    IP_Obj.host_type = IP_Obj_host_type
+                    IP_Obj.alive_urls = IP_Obj_alive_urls
+                    IP_Obj.servers = IP_Obj_servers
+                    IP_Obj.area = IP_Obj_area
+                    IP_Obj.cs = IP_Obj_cs
+                    IP_Obj.get = IP_Obj_get
+                    IP_Obj.save()
+                except:
+                    # 还是无法保存到数据库，直接回滚状态
+                    close_old_connections()
+                    IP_Obj_fx = IP.objects.filter(ip=ip)[0]
+                    IP_Obj_fx.get = '否'
+                    IP_Obj_fx.save()
         except Exception as e:
             Except_Log(stat=28, url=ip+'|清洗 IP 资产失败|', error=str(e))
             # 这里如果失败，则回退
@@ -343,7 +350,8 @@ def Change_IP_Info():
 
 
 def Change_ShowData_Info(Sub_Domains):
-    while 1:
+    # while 1:
+        time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
         time.sleep(random.randint(1, 20))
@@ -506,8 +514,8 @@ def Heartbeat():
             if heartcheck == []:
                 time.sleep(60)
             else:
-                time.sleep(3)
-            # 维持 3 S 发送一次心跳包检测连接，如果失败则清洗连接
+                time.sleep(2)
+            # 维持 2 S 发送一次心跳包检测连接，如果失败则清洗连接
         except:
             print('[+ HeartBeat] 维持心跳包失败，清洗失败链接')
             close_old_connections()
