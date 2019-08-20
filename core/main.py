@@ -34,6 +34,7 @@ def Except_Log(stat,url,error):
     try:
         Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
     except:
+        close_old_connections()
         Error_Log.objects.create(url=url, error='错误代码 [{}] {}'.format(stat,str(error)))
 
 def close_old_connections():
@@ -49,20 +50,18 @@ BA = Domains.objects.all()
 ALL_DOMAINS = [x.get('url') for x in BA.values()]
 
 
-def Run_Cpu_Min():
-    # close_old_connections()
-    while 1:
-        try:
-            c = Cor()
-            cpu, men, new_send, new_recv = c[0], c[1], c[2], c[3]
-            Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
-            # Sem.release()
 
+
+def Run_Cpu_Min():
+    while 1:
+        c = Cor()
+        cpu, men, new_send, new_recv = c[0], c[1], c[2], c[3]
+        try:
+            Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
         except Exception as e:
+            close_old_connections()
+            Cpu_Min.objects.create(cpu=cpu,menory=men,network_send=new_send,network_recv=new_recv)
             Except_Log(stat=16,url='资源监控消耗',error=str(e))
-            #print('错误代码 [16] {}'.format(str(e)))
-            #Error_Log.objects.create(url='监控资源消耗', error='错误代码 [16] {}'.format(str(e)))
-            return '获取失败'
 #
 # def on_done(future):
 #     # 因为每一个线程都有一个 connections，所以这里可以调用 close_all()，把本线程名下的所有连接关闭。
@@ -87,7 +86,10 @@ def get_host(url):
 
 
 def Add_Data_To_Url(url):
-    # close_old_connections()
+    time.sleep(random.randint(5,20))
+    time.sleep(random.randint(5,20))
+    time.sleep(random.randint(5,20))
+    close_old_connections()
     try:
         ip = get_host(url)
         if ip == '获取失败':
@@ -100,6 +102,7 @@ def Add_Data_To_Url(url):
             try:
                 test_url = list(URL.objects.filter(url=url))
             except:
+                close_old_connections()
                 test_url = list(URL.objects.filter(url=url))
 
         # Sem.release()
@@ -125,6 +128,7 @@ def Add_Data_To_Url(url):
                 try:
                     Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=res_status,ip=res_ip)
                 except Exception as e:
+                    close_old_connections()
                     Except_Log(stat=17, url=url + '|标题等信息编码不符合', error=str(e))
                     Other_Url.objects.create(url=res_url, title='Error', power='Error', server=res_server,status=res_status,ip=res_ip)
         except Exception as e:
@@ -157,6 +161,7 @@ def Add_Data_To_Url(url):
                         Cont.save()
                         Show_Data.objects.create(url=url, ip=ip,cs=Show_cs, content=Cont)
                     except Exception as e:
+                        close_old_connections()
                         Except_Log(stat=4, url=url + '|外键添加错误', error=str(e))
                         Show_contents = 'Error'
                         Cont = Content()
@@ -187,14 +192,18 @@ def Add_Data_To_Url(url):
             Except_Log(stat=22, url=url + '|添加到网址索引表失败|', error=str(e))
 
 
-        test_ip = list(IP.objects.filter(ip=ip))
+        try:
+            test_ip = list(IP.objects.filter(ip=ip))
+        except:
+            close_old_connections()
+            test_ip = list(IP.objects.filter(ip=ip))
         # 开始添加ip 维护ip统一
         # 这里开始判断数据库中是否有这个ip，并且先添加然后修改(防止重复浪费资源)
-        if test_ip != []:
-            test_ip_0 = IP.objects.filter(ip=ip)[0]
-            # 这里判断数据中IP时候存在，如果存在并且有扫描状态，就直接中断操作
-            if test_ip_0.get == '是' or test_ip_0.get == '中':
-                return
+        # if test_ip != []:
+        #     test_ip_0 = IP.objects.filter(ip=ip)[0]
+        #     # 这里判断数据中IP时候存在，如果存在并且有扫描状态，就直接中断操作
+        #     if test_ip_0.get == '是' or test_ip_0.get == '中':
+        #         return
         if test_ip ==[]:
             try:
                 IP_Res = Get_Ip_Info(ip)
@@ -219,10 +228,11 @@ def Add_Data_To_Url(url):
 
 
 def Change_IP_Info():
-        # close_old_connections()
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
         time.sleep(random.randint(1,20))
+
+        # 首先捕获一个值，设置为扫描中状态，但是要确保是事务
         try:
             target_ip = IP.objects.filter(get='否')[0]
             ip = target_ip.ip
@@ -233,14 +243,9 @@ def Change_IP_Info():
         except Exception as e:
             time.sleep(360)
             # 等待并充实一次
-            try:
-                target_ip2 = IP.objects.filter(get='否')[0]
-                ip = target_ip2.ip
-                target_ip2.get = '中'
-                target_ip2.save()
-            except Exception as e:
-                Except_Log(stat=39, url='|获取数据库 IP 资产失败|', error=str(e))
-                return
+            close_old_connections()
+            return
+
         try:
             print('[+ Host Scaner] 当前扫描主机 : {}'.format(ip))
             IP_Res = Get_Ip_Info(ip)
@@ -269,8 +274,9 @@ def Change_IP_Info():
             IP_Obj.get = '是'
             IP_Obj.save()
         except Exception as e:
-            Except_Log(stat=53, url='|清洗 IP 资产失败|', error=str(e))
+            Except_Log(stat=53, url=ip+'|清洗 IP 资产失败|', error=str(e))
             # 这里如果失败，则回退
+            close_old_connections()
             IP_Obj_f = IP.objects.filter(ip=ip)[0]
             IP_Obj_f.get = '否'
             IP_Obj_f.save()
@@ -316,8 +322,10 @@ def Change_IP_Info():
 
 
 def Change_ShowData_Info(Sub_Domains):
-        # close_old_connections()
-        # time.sleep(random.randint(1, 20))
+    while 1:
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
+        time.sleep(random.randint(1, 20))
         # 线程同步
         try:
             target_info = Show_Data.objects.filter(success='否')[0]
@@ -325,32 +333,16 @@ def Change_ShowData_Info(Sub_Domains):
             url = target_info.url
             Data_IP = IP.objects.filter(ip=ip)[0]
             if Data_IP.get == '否' or Data_IP.get == '中':
-                # 如果收集整理的数据还没有获取完成
+                # 如果收集整理的数据还没有获取完成,但是一定要保证扫描IP线程数据库连接安全
                 time.sleep(300)
                 return
             else:
                 target_info.get = '中'
-                # 这里就不要设置检查状态了，等到最后再设置
                 target_info.save()
         except Exception as e:
             time.sleep(300)
             # 等待并充实一次
-            try:
-                target_info9 = Show_Data.objects.filter(success='否')[0]
-                ip = target_info9.ip
-                url = target_info9.url
-                Data_IP = IP.objects.filter(ip=ip)[0]
-                if Data_IP.get == '否' or Data_IP.get == '中':
-                    # 如果收集整理的数据还没有获取完成
-                    time.sleep(360)
-                    return
-                else:
-                    target_info9.get = '中'
-                    # 这里就不要设置检查状态了，等到最后再设置
-                    target_info9.save()
-            except Exception as e:
-                Except_Log(stat=41, url= '|清洗数据流程获取数据失败|', error=str(e))
-                return
+            return
         print('[+ DataInfo Collection] 数据整理清洗 : {} --> {}'.format(url,ip))
         try:
             Data_IP = IP.objects.filter(ip=ip)[0]
@@ -416,7 +408,6 @@ def Change_ShowData_Info(Sub_Domains):
 
 def Run_Crawl(Domains):
     Domains = ['.'+str(x) for x in Domains]
-    # close_old_connections()
     time.sleep(random.randint(1, 20))
     time.sleep(random.randint(1, 20))
     time.sleep(random.randint(1, 20))
@@ -427,16 +418,11 @@ def Run_Crawl(Domains):
         target_url.save()
         # 这里需要提前设置的原因是，防止下一个进程启动重复 使用 同一个数据
     except Exception as e:
-        time.sleep(600)
+        time.sleep(300)
+        Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
         # 在获取失败（数据库没数据存入），重试一次
-        try:
-            target_url0 = URL.objects.filter(get='否')[0]
-            url = target_url0.url
-            target_url0.get = '是'
-            target_url0.save()
-        except Exception as e:
-            Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
-            return
+        return
+
     try:
         All_Urls = Crawl(url)
         if All_Urls == []:
@@ -452,6 +438,7 @@ def Run_Crawl(Domains):
                 Other_Domains = list(All_Urls-Sub_Domains1)
             except Exception as e:
                 Except_Log(stat=11, url='|获取URL失败|', error=str(e))
+
             if Other_Domains != [] and Other_Domains != None:
                 try:
                     for urle in Other_Domains:
@@ -459,6 +446,7 @@ def Run_Crawl(Domains):
                             try:
                                 Test_Other_Url = list(Other_Url.objects.filter(url=urle))
                             except:
+                                close_old_connections()
                                 Test_Other_Url = list(Other_Url.objects.filter(url=urle))
                             if Test_Other_Url == []:
                                 ip = get_host(urle)
@@ -477,14 +465,28 @@ def Run_Crawl(Domains):
                                     Other_Url.objects.create(url=res_url, title=res_title, power=res_power, server=res_server,status=status,ip=res_ip)
                                 except Exception as e:
                                     Except_Log(stat=33, url=url+'|资产爬行错误|', error=str(e))
+                                    close_old_connections()
                                     Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
                         except Exception as e:
                             Except_Log(stat=37, url=url + '|资产爬行错误|', error=str(e))
+                            close_old_connections()
                 except Exception as e:
                     Except_Log(stat=36, url=url + '|资产爬行错误|', error=str(e))
-
+                    close_old_connections()
     except Exception as e:
         Except_Log(stat=32, url=url + '|网址爬行错误|', error=str(e))
+        close_old_connections()
+
+
+def Heartbeat():
+    while 1:
+        try:
+            Error_Log.objects.all()
+            time.sleep(2)
+            # 维持 2 S 发送一次心跳包检测连接，如果失败则清洗连接
+        except:
+            print('[+ HeartBeat] 维持心跳包失败，清洗失败链接')
+            close_old_connections()
 
 
 
@@ -502,7 +504,7 @@ def Sub_Api(Sub_Domains):
 
 def Sub_Baidu(Sub_Domains):
     while 1:
-        # close_old_connections()
+        close_old_connections()
         res = []
         for sub_domain in Sub_Domains:
             res = Baidu(sub_domain)
@@ -535,6 +537,11 @@ def Start_Crawl_Run(Sub_Domains):
 def Start_ChangeIp_Run():
     while 1:
         Change_IP_Info()
+def Start_ChangeInf_Run(Sub_Domains):
+    while 1:
+        Change_ShowData_Info(Sub_Domains)
+
+
 
 def Sub_Crawl(pax,Sub_Domains):
     p = Pool(processes=pool_count)
@@ -550,8 +557,11 @@ def Sub_ChangeIp(pax):
     p0.join()
 
 def Sub_ChangeInf(Sub_Domains):
-    while 1:
-        Change_ShowData_Info(Sub_Domains)
+    p2 = Pool(processes=pool_count)
+    for i in range(pool_count):
+        p2.apply_async(Start_ChangeInf_Run,args=(Sub_Domains,))
+    p2.close()
+    p2.join()
 
 
 

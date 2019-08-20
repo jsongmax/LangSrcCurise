@@ -1,5 +1,5 @@
 # coding:utf-8
-from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf,Sub_Api
+from .main import Sub_Crawl,Sub_Baidu,Sub_Brute,Run_Cpu_Min,Sub_ChangeIp,Sub_ChangeInf,Sub_Api,Heartbeat
 import pymysql
 import contextlib
 import configparser
@@ -92,7 +92,6 @@ def start():
     #     Sub_Brute(Sub_Domains)
     #     time.sleep(3600*24)
 
-
     p1 = Process(target=Sub_Api,args=(Sub_Domains,))
     p2 = Process(target=Sub_Baidu,args=(Sub_Domains,))
     p3 = Process(target=Sub_Crawl,args=(pax,Sub_Domains,))
@@ -100,11 +99,13 @@ def start():
     p6 = Process(target=Sub_ChangeIp,args=(pax,))
     p7 = Process(target=Sub_ChangeInf,args=(Sub_Domains,))
     p5 = Process(target=Sub_Brute,args=(Sub_Domains,))
+    p9 = Process(target=Heartbeat)
     p1.start()
     p2.start()
     p3.start()
     p4.start()
     p5.start()
+    p9.start()
     # 下面这两行注释，就不会扫描端口运行服务于部署web站点，这样做获取子域名更快，但是相关IP站点的资产更少
     # 酌情开启
     p6.start()
