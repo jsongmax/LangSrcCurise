@@ -241,7 +241,7 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
-            Except_Log(stat=19, url='|扫描IP资产并设置扫描状态失败|', error='数据库暂无可供扫描IP数据')
+            Except_Log(stat=19, url='|扫描IP资产并设置扫描状态失败|', error='获取预扫描IP失败')
             time.sleep(360)
             # 等待并充实一次
             return
@@ -369,7 +369,7 @@ def Change_ShowData_Info(Sub_Domains):
                 target_info.get = '中'
                 target_info.save()
         except Exception as e:
-            Except_Log(stat=35, url='|清洗数据并设置扫描状态失败|', error='数据库暂无可清洗数据')
+            Except_Log(stat=35, url='|清洗数据并设置扫描状态失败|', error='获取预清洗数据失败')
             time.sleep(300)
             # 等待并充实一次
             return
@@ -451,7 +451,7 @@ def Run_Crawl(Domains):
         # 这里需要提前设置的原因是，防止下一个进程启动重复 使用 同一个数据
     except Exception as e:
         time.sleep(300)
-        Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error='数据库暂无可供爬行网址数据')
+        Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error='获取预爬行网址失败')
         # 在获取失败（数据库没数据存入），重试一次
         return
 
