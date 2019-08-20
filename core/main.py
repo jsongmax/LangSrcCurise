@@ -27,6 +27,8 @@ from multiprocessing import Pool
 import threading
 import multiprocessing
 
+Gloval_Check = {'domain':'qq.com','counts':0}
+
 #Sem = multiprocessing.Manager().BoundedSemaphore(1)
 
 def Except_Log(stat,url,error):
@@ -351,20 +353,27 @@ def Change_IP_Info():
 
 def Change_ShowData_Info(Sub_Domains):
     # while 1:
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        time.sleep(random.randint(1, 20))
-        # 线程同步
         try:
             target_info = Show_Data.objects.filter(success='否')[0]
             ip = target_info.ip
             url = target_info.url
             Data_IP = IP.objects.filter(ip=ip)[0]
-            if Data_IP.get == '否' or Data_IP.get == '中':
+            if Data_IP.get == '否':
                 # 如果收集整理的数据还没有获取完成,但是一定要保证扫描IP线程数据库连接安全
                 time.sleep(300)
                 return
+            elif Data_IP.get == '中':
+                # 如果获取的数据一直都在扫描中，说明有两点原因导致，1是意外关闭 2是正在扫描
+                time.sleep(60)
+                Gloval_Check['domain'] = url
+                Gloval_Check['counts'] = Gloval_Check['counts']+1
+                if Gloval_Check['counts'] == 5:
+                    # 连续五次 6 分钟都获取不到数据，直接跳过
+                    Gloval_Check['counts'] = 0
+                    target_info.get = '中'
+                    target_info.save()
+                else:
+                    return
             else:
                 target_info.get = '中'
                 target_info.save()
@@ -374,6 +383,7 @@ def Change_ShowData_Info(Sub_Domains):
             # 等待并充实一次
             return
         print('[+ DataInfo Collection] 数据整理清洗 : {} --> {}'.format(url,ip))
+
 
         try:
             Data_IP = IP.objects.filter(ip=ip)[0]
@@ -589,11 +599,12 @@ def Sub_ChangeIp(pax):
     p0.join()
 
 def Sub_ChangeInf(Sub_Domains):
-    p2 = Pool(processes=pool_count)
-    for i in range(pool_count):
-        p2.apply_async(Start_ChangeInf_Run,args=(Sub_Domains,))
-    p2.close()
-    p2.join()
+    Start_ChangeInf_Run(Sub_Domains)
+    # p2 = Pool(processes=pool_count)
+    # for i in range(pool_count):
+    #     p2.apply_async(Start_ChangeInf_Run,args=(Sub_Domains,))
+    # p2.close()
+    # p2.join()
 
 
 
