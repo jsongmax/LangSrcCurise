@@ -69,7 +69,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 在主目录下的 config.ini 文件中修改相关mysql登陆信息
 
 	[Server]
-	host = 127.0.0.1 # mysql登陆的ip，linux下设置为localhost
+	host = 127.0.0.1 # mysql登陆的ip，linux下设置为localhost，也可以填写服务器远程IP
 	port = 3306		# mysql 端口
 	username = root
 	password = root
@@ -105,7 +105,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 
 	Auxiliary/SubDomainDict.list
 
-请勿修改文件名
+精心过滤的高质量子域名字典，请勿修改文件名
 
 ## 启动服务
 
@@ -156,7 +156,7 @@ LangSrcCurise资产监控系统是一套实现对指定域名进行持续性信�
 需要管理员权限
 
 
-**默认是扫描IP主机端口服务，但是可以关闭，这样做会加速子域名资产获取速度，但是对应的IP开启服务就没办法获取了**
+**默认是扫描IP主机端口服务，但是可以关闭，这样做会加速子域名资产获取速度，但是对应的IP开启服务就没办法获取了，当然如果你只想采集更多的子域名，并且不需要扫描服务器端口服务的话，也是个不错的选择**
 
 如果需要关闭端口扫描以加快子域名获取：
 
