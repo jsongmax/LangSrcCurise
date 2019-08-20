@@ -214,7 +214,7 @@ def Add_Data_To_Url(url):
                     # 这里先添加数据，异步执行获取到的数据作为结果给下个进程使用
                     # 这里本来是要扫描c段开放端口，但是这样就相当于把耗时操作加载到同步执行的线程中
                     # 于是把扫描开放端口  放在获取ip详细信息线程中处理
-                except:
+                except Exception as e:
                     Except_Log(stat=86, url=url + '|转换IP地区编码失败|', error=str(e))
                     IP.objects.create(ip=ip, servers='None', host_type='None', cs=cs_name,alive_urls='None', area='获取失败')
 
