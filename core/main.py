@@ -241,9 +241,9 @@ def Change_IP_Info():
             # 但是有时候 数据没有正常跑出来 设置成 【是】 会导致偏差
             target_ip.save()
         except Exception as e:
+            Except_Log(stat=19, url='|扫描IP资产并设置扫描状态失败|', error='数据库暂无可供扫描IP数据')
             time.sleep(360)
             # 等待并充实一次
-            close_old_connections()
             return
 
         try:
@@ -264,17 +264,38 @@ def Change_IP_Info():
             # 返回地址
             cs = IP_Res.get_cs_name(ip)
 
-            IP_Obj = IP.objects.filter(ip=ip)[0]
-            IP_Obj.ip = ip
-            IP_Obj.servers = str(servers)
-            IP_Obj.host_type = host_type
-            IP_Obj.alive_urls = str(alive_url)
-            IP_Obj.area = area
-            IP_Obj.cs = cs
-            IP_Obj.get = '是'
-            IP_Obj.save()
+            IP_Obj_ip = ip
+            IP_Obj_servers = str(servers)
+            IP_Obj_host_type = host_type
+            IP_Obj_alive_urls = str(alive_url)
+            IP_Obj_area = area
+            IP_Obj_cs = cs
+            IP_Obj_get = '是'
+            try:
+                IP_Obj = IP.objects.filter(ip=ip)[0]
+                IP_Obj.ip = IP_Obj_ip
+                IP_Obj.host_type = IP_Obj_host_type
+                IP_Obj.alive_urls = IP_Obj_alive_urls
+                IP_Obj.servers = IP_Obj_servers
+                IP_Obj.area = IP_Obj_area
+                IP_Obj.cs = IP_Obj_cs
+                IP_Obj.get = IP_Obj_get
+                IP_Obj.save()
+            except:
+                # 这里重试的原因是有可能因为失去链接导致无法保存
+                # 但是扫描ip是耗时操作，获取的数据不能轻易的舍弃，重试一次
+                close_old_connections()
+                IP_Obj = IP.objects.filter(ip=ip)[0]
+                IP_Obj.ip = IP_Obj_ip
+                IP_Obj.host_type = IP_Obj_host_type
+                IP_Obj.alive_urls = IP_Obj_alive_urls
+                IP_Obj.servers = IP_Obj_servers
+                IP_Obj.area = IP_Obj_area
+                IP_Obj.cs = IP_Obj_cs
+                IP_Obj.get = IP_Obj_get
+                IP_Obj.save()
         except Exception as e:
-            Except_Log(stat=53, url=ip+'|清洗 IP 资产失败|', error=str(e))
+            Except_Log(stat=28, url=ip+'|清洗 IP 资产失败|', error=str(e))
             # 这里如果失败，则回退
             close_old_connections()
             IP_Obj_f = IP.objects.filter(ip=ip)[0]
@@ -340,10 +361,12 @@ def Change_ShowData_Info(Sub_Domains):
                 target_info.get = '中'
                 target_info.save()
         except Exception as e:
+            Except_Log(stat=35, url='|清洗数据并设置扫描状态失败|', error='数据库暂无可清洗数据')
             time.sleep(300)
             # 等待并充实一次
             return
         print('[+ DataInfo Collection] 数据整理清洗 : {} --> {}'.format(url,ip))
+
         try:
             Data_IP = IP.objects.filter(ip=ip)[0]
             try:
@@ -395,6 +418,7 @@ def Change_ShowData_Info(Sub_Domains):
             ShowS_DataD.save()
         except Exception as e:
             Except_Log(stat=43, url=url + '|'+ip+'|清洗数据流程获取数据失败|', error=str(e))
+            close_old_connections()
             ShowS_DataD_f = Show_Data.objects.filter(url=url)[0]
             ShowS_DataD_f.success = '否'
             ShowS_DataD_f.save()
@@ -419,7 +443,7 @@ def Run_Crawl(Domains):
         # 这里需要提前设置的原因是，防止下一个进程启动重复 使用 同一个数据
     except Exception as e:
         time.sleep(300)
-        Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error=str(e))
+        Except_Log(stat=31, url='|获取URL并设置扫描状态失败|', error='数据库暂无可供爬行网址数据')
         # 在获取失败（数据库没数据存入），重试一次
         return
 
@@ -469,21 +493,21 @@ def Run_Crawl(Domains):
                                     Other_Url.objects.create(url=res_url, title='Error', power=res_power, server=res_server,status=status,ip=res_ip)
                         except Exception as e:
                             Except_Log(stat=37, url=url + '|资产爬行错误|', error=str(e))
-                            close_old_connections()
                 except Exception as e:
                     Except_Log(stat=36, url=url + '|资产爬行错误|', error=str(e))
-                    close_old_connections()
     except Exception as e:
         Except_Log(stat=32, url=url + '|网址爬行错误|', error=str(e))
-        close_old_connections()
 
 
 def Heartbeat():
     while 1:
         try:
-            Error_Log.objects.all()
-            time.sleep(2)
-            # 维持 2 S 发送一次心跳包检测连接，如果失败则清洗连接
+            heartcheck = list(URL.objects.all())
+            if heartcheck == []:
+                time.sleep(60)
+            else:
+                time.sleep(3)
+            # 维持 3 S 发送一次心跳包检测连接，如果失败则清洗连接
         except:
             print('[+ HeartBeat] 维持心跳包失败，清洗失败链接')
             close_old_connections()
